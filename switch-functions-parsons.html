@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Switch & Functions Practice</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(to bottom, #f1f5f9, #e2e8f0);
+            min-height: 100vh;
+            padding: 1rem;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .progress {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .open-external {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+            color: #475569;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .open-external:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+            color: #1e293b;
+        }
+
+        .progress-btn {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 0.875rem;
+            border: 2px solid #cbd5e1;
+            background: white;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .progress-btn.active {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+            transform: scale(1.1);
+        }
+
+        .progress-btn.completed {
+            background: #22c55e;
+            color: white;
+            border-color: #22c55e;
+        }
+
+        .problem-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            padding: 1rem;
+        }
+
+        .problem-header {
+            background: linear-gradient(to right, #eff6ff, #eef2ff);
+            border: 1px solid #bfdbfe;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .problem-header h2 {
+            color: #1e293b;
+            font-size: 1.125rem;
+            margin-bottom: 0.375rem;
+        }
+
+        .problem-header p {
+            color: #475569;
+            font-size: 0.9375rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .circuit-hint {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.6);
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.8125rem;
+            color: #64748b;
+        }
+
+        .circuit-hint svg {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Static code section */
+        .static-code-section {
+            margin-bottom: 1rem;
+        }
+
+        .static-code-section h4 {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .static-code {
+            background: #1e293b;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.8125rem;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+
+        .static-code pre {
+            margin: 0;
+            padding: 0;
+        }
+
+        .static-code code {
+            color: #e2e8f0;
+        }
+
+        .static-code .keyword { color: #c084fc; }
+        .static-code .function { color: #60a5fa; }
+        .static-code .number { color: #4ade80; }
+        .static-code .comment { color: #64748b; }
+        .static-code .string { color: #fbbf24; }
+
+        .columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .columns {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .column h3 {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 0.5rem;
+        }
+
+        .column h3 span {
+            font-weight: normal;
+            color: #94a3b8;
+        }
+
+        .block-area {
+            min-height: 140px;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 2px dashed;
+        }
+
+        .available-area {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+        }
+
+        .solution-area {
+            background: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 1.5rem;
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+
+        .solution-area .empty-message {
+            color: #86efac;
+        }
+
+        .code-block {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem 0.625rem;
+            margin-bottom: 0.375rem;
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 0.375rem;
+            cursor: grab;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.8125rem;
+            transition: all 0.2s;
+        }
+
+        .code-block:hover {
+            border-color: #60a5fa;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .code-block.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+
+        .code-block.distractor-hint {
+            background: #fef2f2;
+            border-color: #fca5a5;
+            color: #991b1b;
+        }
+
+        .code-block .grip {
+            color: #94a3b8;
+            flex-shrink: 0;
+        }
+
+        .code-block code {
+            flex: 1;
+        }
+
+        .indent-1 { margin-left: 1.25rem; }
+        .indent-2 { margin-left: 2.5rem; }
+        .indent-3 { margin-left: 3.75rem; }
+
+        .indent-controls {
+            display: flex;
+            gap: 0.125rem;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .indent-btn {
+            width: 1.375rem;
+            height: 1.375rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: #64748b;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: bold;
+            transition: all 0.15s;
+            padding: 0;
+        }
+
+        .indent-btn:hover {
+            background: #e2e8f0;
+            border-color: #94a3b8;
+            color: #334155;
+        }
+
+        .indent-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .indent-btn:disabled:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            color: #64748b;
+        }
+
+        .trash-zone {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.625rem;
+            margin-top: 0.5rem;
+            border: 2px dashed #cbd5e1;
+            border-radius: 0.375rem;
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 0.8125rem;
+            transition: all 0.2s;
+        }
+
+        .trash-zone.drag-over {
+            background: #fef2f2;
+            border-color: #f87171;
+            color: #b91c1c;
+        }
+
+        .discarded-section {
+            margin-top: 0.5rem;
+        }
+
+        .discarded-section h4 {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-bottom: 0.375rem;
+        }
+
+        .discarded-section .code-block {
+            opacity: 0.6;
+        }
+
+        .feedback {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .feedback.success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+
+        .feedback.error {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            color: #92400e;
+        }
+
+        .feedback svg {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+
+        .btn-hint {
+            background: #fef3c7;
+            color: #b45309;
+        }
+
+        .btn-hint:hover {
+            background: #fde68a;
+        }
+
+        .btn-success {
+            background: #22c55e;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #16a34a;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .completion-screen {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .completion-screen .emoji {
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .completion-screen h2 {
+            font-size: 1.25rem;
+            color: #1e293b;
+            margin-bottom: 0.375rem;
+        }
+
+        .completion-screen p {
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+
+        /* Code output modal */
+        .code-output {
+            margin-top: 1rem;
+            background: #1e293b;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .code-output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            background: #334155;
+        }
+
+        .code-output-header span {
+            color: #94a3b8;
+            font-size: 0.8125rem;
+            font-weight: 500;
+        }
+
+        .copy-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.625rem;
+            background: #475569;
+            color: #e2e8f0;
+            border: none;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #64748b;
+        }
+
+        .copy-btn.copied {
+            background: #22c55e;
+            color: white;
+        }
+
+        .code-output pre {
+            padding: 0.75rem;
+            margin: 0;
+            color: #e2e8f0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.8125rem;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+
+        .code-output code {
+            color: #e2e8f0;
+        }
+
+        .code-output .keyword { color: #c084fc; }
+        .code-output .function { color: #60a5fa; }
+        .code-output .number { color: #4ade80; }
+        .code-output .comment { color: #64748b; }
+
+        footer {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <div class="progress" id="progress"></div>
+            <a href="" class="open-external" id="openExternal" target="_blank">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>
+                </svg>
+                Open in New Window
+            </a>
+        </div>
+
+        <div class="problem-card" id="problemCard">
+            <!-- Problem content injected here -->
+        </div>
+
+        <div class="problem-card hidden" id="completionScreen">
+            <div class="completion-screen">
+                <div class="emoji">🎉</div>
+                <h2>All Problems Complete!</h2>
+                <p>You're ready to design your own switch-controlled light shows!</p>
+                <button class="btn btn-primary" onclick="startOver()">Start Over</button>
+            </div>
+        </div>
+
+        <footer>
+            Drag blocks to build your solution • Use arrow buttons to set indentation • Discard distractors in the trash
+        </footer>
+    </div>
+
+    <script>
+        // Problem definitions
+        const problems = [
+            {
+                id: 1,
+                title: "Switch-Controlled LED",
+                description: "Read a slide switch on GP14. When the switch is in one position (value 1), turn on an LED. When in the other position (value 0), turn it off.",
+                circuitHint: "Switch on GP14 (with pull-down resistor to GND). LED on GP15 with 330Ω resistor.",
+                staticCode: `from machine import Pin
+from time import sleep
+
+led = Pin(15, Pin.OUT)`,
+                staticCodeHighlighted: `<span class="keyword">from</span> machine <span class="keyword">import</span> Pin
+<span class="keyword">from</span> time <span class="keyword">import</span> sleep
+
+led = <span class="function">Pin</span>(<span class="number">15</span>, Pin.OUT)`,
+                codeBlocks: [
+                    { id: 'a1', text: "switch = Pin(14, Pin.IN)", correctIndent: 0 },
+                    { id: 'a2', text: "while True:", correctIndent: 0 },
+                    { id: 'a3', text: "if switch.value() == 1:", correctIndent: 1 },
+                    { id: 'a4', text: "led.value(1)", correctIndent: 2 },
+                    { id: 'a5', text: "else:", correctIndent: 1 },
+                    { id: 'a6', text: "led.value(0)", correctIndent: 2 },
+                ],
+                distractors: [
+                    { id: 'd1', text: "switch = Pin(14, Pin.OUT)", correctIndent: 0, reason: "Use Pin.IN for inputs like switches, Pin.OUT is for outputs like LEDs" },
+                    { id: 'd2', text: "if switch.value(1):", correctIndent: 1, reason: "switch.value() reads the switch — don't put a number inside. Use == 1 to compare" },
+                    { id: 'd3', text: "if switch.value() = 1:", correctIndent: 1, reason: "Use == for comparison, single = is for assignment" },
+                ]
+            },
+            {
+                id: 2,
+                title: "Switch Selects Between Two Functions",
+                description: "Define two functions: show_left() blinks the LED on GP15, show_right() blinks the LED on GP16. Use the switch to choose which function runs.",
+                circuitHint: "Switch on GP14. LEDs on GP15 and GP16, each with 330Ω resistors.",
+                staticCode: `from machine import Pin
+from time import sleep
+
+led_left = Pin(15, Pin.OUT)
+led_right = Pin(16, Pin.OUT)
+switch = Pin(14, Pin.IN)`,
+                staticCodeHighlighted: `<span class="keyword">from</span> machine <span class="keyword">import</span> Pin
+<span class="keyword">from</span> time <span class="keyword">import</span> sleep
+
+led_left = <span class="function">Pin</span>(<span class="number">15</span>, Pin.OUT)
+led_right = <span class="function">Pin</span>(<span class="number">16</span>, Pin.OUT)
+switch = <span class="function">Pin</span>(<span class="number">14</span>, Pin.IN)`,
+                codeBlocks: [
+                    { id: 'b1', text: "def show_left():", correctIndent: 0 },
+                    { id: 'b2', text: "led_left.value(1)", correctIndent: 1 },
+                    { id: 'b3', text: "sleep(0.3)", correctIndent: 1 },
+                    { id: 'b4', text: "led_left.value(0)", correctIndent: 1 },
+                    { id: 'b5', text: "def show_right():", correctIndent: 0 },
+                    { id: 'b6', text: "led_right.value(1)", correctIndent: 1 },
+                    { id: 'b7', text: "sleep(0.3)", correctIndent: 1 },
+                    { id: 'b8', text: "led_right.value(0)", correctIndent: 1 },
+                    { id: 'b9', text: "while True:", correctIndent: 0 },
+                    { id: 'b10', text: "if switch.value() == 1:", correctIndent: 1 },
+                    { id: 'b11', text: "show_left()", correctIndent: 2 },
+                    { id: 'b12', text: "else:", correctIndent: 1 },
+                    { id: 'b13', text: "show_right()", correctIndent: 2 },
+                ],
+                distractors: [
+                    { id: 'd4', text: "def show_left():", correctIndent: 1, reason: "Function definitions go at indent level 0 — they're defined outside the main loop" },
+                    { id: 'd5', text: "show_left", correctIndent: 2, reason: "To call a function, you need parentheses: show_left()" },
+                    { id: 'd6', text: "def show_left()", correctIndent: 0, reason: "Function definitions need a colon at the end: def show_left():" },
+                ]
+            },
+            {
+                id: 3,
+                title: "Switch Selects LED Chase vs. RGB Color",
+                description: "Create led_chase() that lights three LEDs in sequence, and show_color() that displays a color on the RGB LED. The switch selects which runs.",
+                circuitHint: "Switch on GP14. Regular LEDs on GP15-17. RGB LED: Red=GP13, Green=GP18, Blue=GP19.",
+                staticCode: `from machine import Pin, PWM
+from time import sleep
+
+# Regular LEDs
+led1 = Pin(15, Pin.OUT)
+led2 = Pin(16, Pin.OUT)
+led3 = Pin(17, Pin.OUT)
+
+# Switch
+switch = Pin(14, Pin.IN)
+
+# RGB LED with PWM
+red = PWM(Pin(13))
+green = PWM(Pin(18))
+blue = PWM(Pin(19))
+red.freq(1000)
+green.freq(1000)
+blue.freq(1000)
+
+def color_set(r, g, b):
+    red.duty_u16(int(r * 257))
+    green.duty_u16(int(g * 257))
+    blue.duty_u16(int(b * 257))`,
+                staticCodeHighlighted: `<span class="keyword">from</span> machine <span class="keyword">import</span> Pin, PWM
+<span class="keyword">from</span> time <span class="keyword">import</span> sleep
+
+<span class="comment"># Regular LEDs</span>
+led1 = <span class="function">Pin</span>(<span class="number">15</span>, Pin.OUT)
+led2 = <span class="function">Pin</span>(<span class="number">16</span>, Pin.OUT)
+led3 = <span class="function">Pin</span>(<span class="number">17</span>, Pin.OUT)
+
+<span class="comment"># Switch</span>
+switch = <span class="function">Pin</span>(<span class="number">14</span>, Pin.IN)
+
+<span class="comment"># RGB LED with PWM</span>
+red = <span class="function">PWM</span>(<span class="function">Pin</span>(<span class="number">13</span>))
+green = <span class="function">PWM</span>(<span class="function">Pin</span>(<span class="number">18</span>))
+blue = <span class="function">PWM</span>(<span class="function">Pin</span>(<span class="number">19</span>))
+red.<span class="function">freq</span>(<span class="number">1000</span>)
+green.<span class="function">freq</span>(<span class="number">1000</span>)
+blue.<span class="function">freq</span>(<span class="number">1000</span>)
+
+<span class="keyword">def</span> <span class="function">color_set</span>(r, g, b):
+    red.<span class="function">duty_u16</span>(<span class="function">int</span>(r * <span class="number">257</span>))
+    green.<span class="function">duty_u16</span>(<span class="function">int</span>(g * <span class="number">257</span>))
+    blue.<span class="function">duty_u16</span>(<span class="function">int</span>(b * <span class="number">257</span>))`,
+                codeBlocks: [
+                    { id: 'c1', text: "def led_chase():", correctIndent: 0 },
+                    { id: 'c2', text: "led1.value(1)", correctIndent: 1 },
+                    { id: 'c3', text: "sleep(0.2)", correctIndent: 1 },
+                    { id: 'c4', text: "led1.value(0)", correctIndent: 1 },
+                    { id: 'c5', text: "led2.value(1)", correctIndent: 1 },
+                    { id: 'c6', text: "sleep(0.2)", correctIndent: 1 },
+                    { id: 'c7', text: "led2.value(0)", correctIndent: 1 },
+                    { id: 'c8', text: "led3.value(1)", correctIndent: 1 },
+                    { id: 'c9', text: "sleep(0.2)", correctIndent: 1 },
+                    { id: 'c10', text: "led3.value(0)", correctIndent: 1 },
+                    { id: 'c11', text: "def show_color():", correctIndent: 0 },
+                    { id: 'c12', text: "color_set(255, 0, 128)", correctIndent: 1 },
+                    { id: 'c13', text: "sleep(0.5)", correctIndent: 1 },
+                    { id: 'c14', text: "color_set(0, 255, 64)", correctIndent: 1 },
+                    { id: 'c15', text: "sleep(0.5)", correctIndent: 1 },
+                    { id: 'c16', text: "while True:", correctIndent: 0 },
+                    { id: 'c17', text: "if switch.value() == 1:", correctIndent: 1 },
+                    { id: 'c18', text: "led_chase()", correctIndent: 2 },
+                    { id: 'c19', text: "else:", correctIndent: 1 },
+                    { id: 'c20', text: "show_color()", correctIndent: 2 },
+                ],
+                distractors: [
+                    { id: 'd7', text: "led1.value(1)", correctIndent: 0, reason: "Code inside a function must be indented under the def line" },
+                    { id: 'd8', text: "color_set(255, 0, 128)", correctIndent: 0, reason: "This should be inside the show_color() function, not at the top level" },
+                    { id: 'd9', text: "red.value(255)", correctIndent: 1, reason: "RGB LED uses PWM — use color_set() or duty_u16(), not value()" },
+                    { id: 'd10', text: "def led_chase()", correctIndent: 0, reason: "Function definitions need a colon at the end" },
+                ]
+            }
+        ];
+
+        // State
+        let currentProblem = 0;
+        let completed = [];
+        let availableBlocks = [];
+        let solutionBlocks = [];
+        let discardedBlocks = [];
+        let draggedBlock = null;
+        let attempts = 0;
+        let showHint = false;
+
+        // Utility functions
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function isDistractor(block) {
+            return problems[currentProblem].distractors.some(d => d.id === block.id);
+        }
+
+        function getDistractorReason(block) {
+            const distractor = problems[currentProblem].distractors.find(d => d.id === block.id);
+            return distractor ? distractor.reason : '';
+        }
+
+        // Icons as SVG strings
+        const icons = {
+            grip: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>',
+            trash: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>',
+            check: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>',
+            checkSmall: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>',
+            copy: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>',
+            x: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>',
+            lightbulb: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M9 18h6M10 22h4M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0018 8 6 6 0 006 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 018.91 14"/></svg>',
+            rotate: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>',
+            chevron: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>',
+            indentLeft: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>',
+            indentRight: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>'
+        };
+
+        // Render functions
+        function renderProgress() {
+            const container = document.getElementById('progress');
+            container.innerHTML = problems.map((p, i) => {
+                let classes = 'progress-btn';
+                if (i === currentProblem) classes += ' active';
+                if (completed.includes(i)) classes += ' completed';
+                return `<button class="${classes}" onclick="goToProblem(${i})">${completed.includes(i) ? '✓' : p.id}</button>`;
+            }).join('');
+        }
+
+        function renderCodeBlock(block, area = 'available', solutionIndex = -1) {
+            const problem = problems[currentProblem];
+            const distractorClass = showHint && isDistractor(block) ? 'distractor-hint' : '';
+            
+            if (area === 'solution') {
+                const solBlock = solutionBlocks[solutionIndex];
+                const indent = solBlock ? solBlock.indent : 0;
+                const indentClass = indent > 0 ? `indent-${indent}` : '';
+                
+                return `
+                    <div class="code-block ${indentClass} ${distractorClass}" 
+                         draggable="true" 
+                         data-id="${block.id}"
+                         data-index="${solutionIndex}"
+                         data-area="solution">
+                        <span class="grip">${icons.grip}</span>
+                        <code>${escapeHtml(block.text)}</code>
+                        <div class="indent-controls">
+                            <button class="indent-btn" onclick="adjustIndent(${solutionIndex}, -1)" ${indent === 0 ? 'disabled' : ''} title="Decrease indent">
+                                ${icons.indentLeft}
+                            </button>
+                            <button class="indent-btn" onclick="adjustIndent(${solutionIndex}, 1)" ${indent >= 3 ? 'disabled' : ''} title="Increase indent">
+                                ${icons.indentRight}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="code-block ${distractorClass}" 
+                         draggable="true" 
+                         data-id="${block.id}"
+                         data-area="${area}">
+                        <span class="grip">${icons.grip}</span>
+                        <code>${escapeHtml(block.text)}</code>
+                    </div>
+                `;
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function adjustIndent(index, delta) {
+            const current = solutionBlocks[index].indent;
+            const newIndent = Math.max(0, Math.min(3, current + delta));
+            solutionBlocks[index].indent = newIndent;
+            clearFeedback();
+            renderProblem();
+        }
+
+        function renderProblem() {
+            const problem = problems[currentProblem];
+            const card = document.getElementById('problemCard');
+            
+            card.innerHTML = `
+                <div class="problem-header">
+                    <h2>Problem ${problem.id}: ${problem.title}</h2>
+                    <p>${problem.description}</p>
+                    <div class="circuit-hint">
+                        ${icons.lightbulb}
+                        <span><strong>Circuit:</strong> ${problem.circuitHint}</span>
+                    </div>
+                </div>
+
+                <div class="static-code-section">
+                    <h4>Setup Code (already written for you)</h4>
+                    <div class="static-code">
+                        <pre><code>${problem.staticCodeHighlighted}</code></pre>
+                    </div>
+                </div>
+
+                <div class="columns">
+                    <div class="column">
+                        <h3>Code Blocks <span>(includes ${problem.distractors.length} distractors!)</span></h3>
+                        <div class="block-area available-area" id="availableArea">
+                            ${availableBlocks.length === 0 
+                                ? '<p class="empty-message">All blocks placed</p>'
+                                : availableBlocks.map(b => renderCodeBlock(b, 'available')).join('')
+                            }
+                        </div>
+                        <div class="trash-zone" id="trashZone">
+                            ${icons.trash}
+                            <span>Drag distractors here</span>
+                        </div>
+                        ${discardedBlocks.length > 0 ? `
+                            <div class="discarded-section">
+                                <h4>Discarded:</h4>
+                                ${discardedBlocks.map(b => renderCodeBlock(b, 'discarded')).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="column">
+                        <h3>Your Solution <span>(use ◀ ▶ to indent)</span></h3>
+                        <div class="block-area solution-area" id="solutionArea">
+                            ${solutionBlocks.length === 0 
+                                ? '<p class="empty-message">Drag code blocks here</p>'
+                                : solutionBlocks.map((solBlock, index) => {
+                                    const block = findBlock(solBlock.id);
+                                    return renderCodeBlock(block, 'solution', index);
+                                }).join('')
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div id="feedbackArea"></div>
+
+                <div id="codeOutputArea" class="hidden"></div>
+
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="checkSolution()">Check Solution</button>
+                    <button class="btn btn-secondary" onclick="resetProblem()">
+                        ${icons.rotate} Reset
+                    </button>
+                    <button class="btn btn-hint ${attempts < 2 ? 'hidden' : ''}" id="hintBtn" onclick="toggleHint()">
+                        ${showHint ? 'Hide Hint' : 'Show Hint'}
+                    </button>
+                    <button class="btn btn-success hidden" id="nextBtn" onclick="nextProblem()">
+                        Next Problem ${icons.chevron}
+                    </button>
+                </div>
+            `;
+
+            setupDragAndDrop();
+        }
+
+        function showFeedback(correct, message) {
+            const area = document.getElementById('feedbackArea');
+            area.innerHTML = `
+                <div class="feedback ${correct ? 'success' : 'error'}">
+                    ${correct ? icons.check : icons.x}
+                    <span>${message}</span>
+                </div>
+            `;
+
+            if (correct) {
+                document.getElementById('nextBtn').classList.remove('hidden');
+                showCodeOutput();
+            }
+        }
+
+        function generatePlainTextCode() {
+            const problem = problems[currentProblem];
+            const lines = [];
+            
+            // Add header comment
+            lines.push(`# ${problem.title}`);
+            lines.push('');
+            
+            // Add static code
+            lines.push(problem.staticCode);
+            lines.push('');
+            
+            // Add solution blocks with their indentation
+            solutionBlocks.forEach(sb => {
+                const block = findBlock(sb.id);
+                const indent = '    '.repeat(sb.indent);
+                lines.push(indent + block.text);
+            });
+            
+            return lines.join('\n');
+        }
+
+        function highlightSyntax(code) {
+            return code
+                .replace(/\b(from|import|while|True|False|if|else|elif|for|in|def|return|and|or|not)\b/g, '<span class="keyword">$1</span>')
+                .replace(/\b(Pin|PWM|sleep|value|print|freq|duty_u16|color_set|led_chase|show_color|show_left|show_right|int)\b/g, '<span class="function">$1</span>')
+                .replace(/\b(\d+\.?\d*)\b/g, '<span class="number">$1</span>')
+                .replace(/(#.*)/g, '<span class="comment">$1</span>');
+        }
+
+        function showCodeOutput() {
+            const area = document.getElementById('codeOutputArea');
+            const plainCode = generatePlainTextCode();
+            const highlightedCode = highlightSyntax(escapeHtml(plainCode));
+            
+            area.classList.remove('hidden');
+            area.innerHTML = `
+                <div class="code-output">
+                    <div class="code-output-header">
+                        <span>📋 Copy this code into Thonny</span>
+                        <button class="copy-btn" onclick="copyCode()">
+                            ${icons.copy} Copy Code
+                        </button>
+                    </div>
+                    <pre><code>${highlightedCode}</code></pre>
+                </div>
+            `;
+        }
+
+        function copyCode() {
+            const plainCode = generatePlainTextCode();
+            
+            navigator.clipboard.writeText(plainCode).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.innerHTML = `${icons.checkSmall} Copied!`;
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.innerHTML = `${icons.copy} Copy Code`;
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                const textarea = document.createElement('textarea');
+                textarea.value = plainCode;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                
+                const btn = document.querySelector('.copy-btn');
+                btn.innerHTML = `${icons.checkSmall} Copied!`;
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.innerHTML = `${icons.copy} Copy Code`;
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Drag and drop
+        function setupDragAndDrop() {
+            const blocks = document.querySelectorAll('.code-block');
+            const availableArea = document.getElementById('availableArea');
+            const solutionArea = document.getElementById('solutionArea');
+            const trashZone = document.getElementById('trashZone');
+
+            blocks.forEach(block => {
+                block.addEventListener('dragstart', handleDragStart);
+                block.addEventListener('dragend', handleDragEnd);
+                block.addEventListener('dragover', handleBlockDragOver);
+                block.addEventListener('drop', handleBlockDrop);
+            });
+
+            availableArea.addEventListener('dragover', handleDragOver);
+            availableArea.addEventListener('drop', handleDropOnAvailable);
+
+            solutionArea.addEventListener('dragover', handleDragOver);
+            solutionArea.addEventListener('drop', handleDropOnSolution);
+
+            trashZone.addEventListener('dragover', handleDragOver);
+            trashZone.addEventListener('dragenter', () => trashZone.classList.add('drag-over'));
+            trashZone.addEventListener('dragleave', () => trashZone.classList.remove('drag-over'));
+            trashZone.addEventListener('drop', handleDropOnTrash);
+        }
+
+        function handleDragStart(e) {
+            const id = e.target.dataset.id;
+            draggedBlock = findBlock(id);
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            draggedBlock = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleBlockDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function handleBlockDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (!draggedBlock) return;
+            
+            const targetEl = e.target.closest('.code-block');
+            const targetArea = targetEl.dataset.area;
+            
+            if (targetArea === 'solution') {
+                const targetIndex = parseInt(targetEl.dataset.index);
+                removeBlockFromAll(draggedBlock.id);
+                solutionBlocks.splice(targetIndex, 0, { id: draggedBlock.id, indent: 0 });
+                clearFeedback();
+                renderProblem();
+            }
+        }
+
+        function handleDropOnAvailable(e) {
+            e.preventDefault();
+            if (!draggedBlock) return;
+            
+            removeBlockFromAll(draggedBlock.id);
+            if (!availableBlocks.find(b => b.id === draggedBlock.id)) {
+                availableBlocks.push(draggedBlock);
+            }
+            clearFeedback();
+            renderProblem();
+        }
+
+        function handleDropOnSolution(e) {
+            e.preventDefault();
+            if (!draggedBlock) return;
+            
+            removeBlockFromAll(draggedBlock.id);
+            solutionBlocks.push({ id: draggedBlock.id, indent: 0 });
+            clearFeedback();
+            renderProblem();
+        }
+
+        function handleDropOnTrash(e) {
+            e.preventDefault();
+            document.getElementById('trashZone').classList.remove('drag-over');
+            if (!draggedBlock) return;
+            
+            removeBlockFromAll(draggedBlock.id);
+            if (!discardedBlocks.find(b => b.id === draggedBlock.id)) {
+                discardedBlocks.push(draggedBlock);
+            }
+            clearFeedback();
+            renderProblem();
+        }
+
+        function findBlock(id) {
+            const problem = problems[currentProblem];
+            return [...problem.codeBlocks, ...problem.distractors].find(b => b.id === id);
+        }
+
+        function removeBlockFromAll(id) {
+            availableBlocks = availableBlocks.filter(b => b.id !== id);
+            solutionBlocks = solutionBlocks.filter(sb => sb.id !== id);
+            discardedBlocks = discardedBlocks.filter(b => b.id !== id);
+        }
+
+        function clearFeedback() {
+            const area = document.getElementById('feedbackArea');
+            if (area) area.innerHTML = '';
+            const codeArea = document.getElementById('codeOutputArea');
+            if (codeArea) {
+                codeArea.classList.add('hidden');
+                codeArea.innerHTML = '';
+            }
+            const nextBtn = document.getElementById('nextBtn');
+            if (nextBtn) nextBtn.classList.add('hidden');
+        }
+
+        // Actions
+        function checkSolution() {
+            attempts++;
+            const problem = problems[currentProblem];
+            
+            if (attempts >= 2) {
+                document.getElementById('hintBtn').classList.remove('hidden');
+            }
+
+            // Check for distractors
+            const distractorIds = problem.distractors.map(d => d.id);
+            const distractorsInSolution = solutionBlocks.filter(sb => distractorIds.includes(sb.id));
+            
+            if (distractorsInSolution.length > 0) {
+                const distractor = problem.distractors.find(d => d.id === distractorsInSolution[0].id);
+                showFeedback(false, `This line doesn't belong: "${distractor.text}" — ${distractor.reason}`);
+                return;
+            }
+
+            // Check block count
+            if (solutionBlocks.length !== problem.codeBlocks.length) {
+                showFeedback(false, `Your solution has ${solutionBlocks.length} lines, but the correct solution needs ${problem.codeBlocks.length} lines.`);
+                return;
+            }
+
+            // Check order
+            const orderCorrect = solutionBlocks.every((sb, index) => 
+                sb.id === problem.codeBlocks[index].id
+            );
+
+            if (!orderCorrect) {
+                showFeedback(false, "The blocks are in the wrong order. Think about what needs to be defined before it can be used.");
+                return;
+            }
+
+            // Check indentation
+            const indentErrors = [];
+            solutionBlocks.forEach((sb, index) => {
+                const correctBlock = problem.codeBlocks[index];
+                if (sb.indent !== correctBlock.correctIndent) {
+                    indentErrors.push({
+                        text: correctBlock.text,
+                        got: sb.indent,
+                        expected: correctBlock.correctIndent
+                    });
+                }
+            });
+
+            if (indentErrors.length > 0) {
+                const err = indentErrors[0];
+                const direction = err.got < err.expected ? "needs more indentation" : "has too much indentation";
+                showFeedback(false, `Indentation error: "${err.text}" ${direction}. Code inside functions and if/else blocks must be indented.`);
+                return;
+            }
+
+            showFeedback(true, "Excellent! Your code is correct — including the indentation!");
+        }
+
+        function resetProblem() {
+            const problem = problems[currentProblem];
+            availableBlocks = shuffleArray([...problem.codeBlocks, ...problem.distractors]);
+            solutionBlocks = [];
+            discardedBlocks = [];
+            attempts = 0;
+            showHint = false;
+            renderProblem();
+        }
+
+        function toggleHint() {
+            showHint = !showHint;
+            renderProblem();
+        }
+
+        function nextProblem() {
+            if (!completed.includes(currentProblem)) {
+                completed.push(currentProblem);
+            }
+            
+            if (currentProblem < problems.length - 1) {
+                currentProblem++;
+                initProblem();
+            } else {
+                document.getElementById('problemCard').classList.add('hidden');
+                document.getElementById('completionScreen').classList.remove('hidden');
+                renderProgress();
+            }
+        }
+
+        function goToProblem(index) {
+            currentProblem = index;
+            initProblem();
+            document.getElementById('problemCard').classList.remove('hidden');
+            document.getElementById('completionScreen').classList.add('hidden');
+        }
+
+        function startOver() {
+            currentProblem = 0;
+            completed = [];
+            initProblem();
+            document.getElementById('problemCard').classList.remove('hidden');
+            document.getElementById('completionScreen').classList.add('hidden');
+        }
+
+        function initProblem() {
+            const problem = problems[currentProblem];
+            availableBlocks = shuffleArray([...problem.codeBlocks, ...problem.distractors]);
+            solutionBlocks = [];
+            discardedBlocks = [];
+            attempts = 0;
+            showHint = false;
+            renderProgress();
+            renderProblem();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('openExternal').href = window.location.href;
+            initProblem();
+        });
+    </script>
+</body>
+</html>
