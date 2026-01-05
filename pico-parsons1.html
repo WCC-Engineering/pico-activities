@@ -221,6 +221,48 @@
 
         .indent-1 { margin-left: 1.25rem; }
         .indent-2 { margin-left: 2.5rem; }
+        .indent-3 { margin-left: 3.75rem; }
+
+        .indent-controls {
+            display: flex;
+            gap: 0.125rem;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .indent-btn {
+            width: 1.375rem;
+            height: 1.375rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: #64748b;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: bold;
+            transition: all 0.15s;
+            padding: 0;
+        }
+
+        .indent-btn:hover {
+            background: #e2e8f0;
+            border-color: #94a3b8;
+            color: #334155;
+        }
+
+        .indent-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .indent-btn:disabled:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            color: #64748b;
+        }
 
         .trash-zone {
             display: flex;
@@ -464,7 +506,7 @@
         </div>
 
         <footer>
-            Drag blocks to build your solution • Discard distractors in the trash
+            Drag blocks to build your solution • Use arrow buttons to set indentation • Discard distractors in the trash
         </footer>
     </div>
 
@@ -477,22 +519,22 @@
                 description: "Make two LEDs connected to GP15 and GP16 blink on and off at the same time, with a half-second delay between changes.",
                 circuitHint: "Connect LED1 to GP15 and LED2 to GP16, each with a 330Ω resistor to ground.",
                 codeBlocks: [
-                    { id: 'a1', text: "from machine import Pin", indent: 0 },
-                    { id: 'a2', text: "from time import sleep", indent: 0 },
-                    { id: 'a3', text: "led1 = Pin(15, Pin.OUT)", indent: 0 },
-                    { id: 'a4', text: "led2 = Pin(16, Pin.OUT)", indent: 0 },
-                    { id: 'a5', text: "while True:", indent: 0 },
-                    { id: 'a6', text: "led1.value(1)", indent: 1 },
-                    { id: 'a7', text: "led2.value(1)", indent: 1 },
-                    { id: 'a8', text: "sleep(0.5)", indent: 1 },
-                    { id: 'a9', text: "led1.value(0)", indent: 1 },
-                    { id: 'a10', text: "led2.value(0)", indent: 1 },
-                    { id: 'a11', text: "sleep(0.5)", indent: 1 },
+                    { id: 'a1', text: "from machine import Pin", correctIndent: 0 },
+                    { id: 'a2', text: "from time import sleep", correctIndent: 0 },
+                    { id: 'a3', text: "led1 = Pin(15, Pin.OUT)", correctIndent: 0 },
+                    { id: 'a4', text: "led2 = Pin(16, Pin.OUT)", correctIndent: 0 },
+                    { id: 'a5', text: "while True:", correctIndent: 0 },
+                    { id: 'a6', text: "led1.value(1)", correctIndent: 1 },
+                    { id: 'a7', text: "led2.value(1)", correctIndent: 1 },
+                    { id: 'a8', text: "sleep(0.5)", correctIndent: 1 },
+                    { id: 'a9', text: "led1.value(0)", correctIndent: 1 },
+                    { id: 'a10', text: "led2.value(0)", correctIndent: 1 },
+                    { id: 'a11', text: "sleep(0.5)", correctIndent: 1 },
                 ],
                 distractors: [
-                    { id: 'd1', text: "led1 = Pin(15, Pin.IN)", indent: 0, reason: "Pin.IN is for reading inputs, not controlling outputs" },
-                    { id: 'd2', text: "from time import wait", indent: 0, reason: "The function is called 'sleep', not 'wait'" },
-                    { id: 'd3', text: "led1.on()", indent: 1, reason: "Use .value(1) to turn on — .on() doesn't exist in MicroPython" },
+                    { id: 'd1', text: "led1 = Pin(15, Pin.IN)", correctIndent: 0, reason: "Pin.IN is for reading inputs, not controlling outputs" },
+                    { id: 'd2', text: "from time import wait", correctIndent: 0, reason: "The function is called 'sleep', not 'wait'" },
+                    { id: 'd3', text: "led1.on()", correctIndent: 1, reason: "Use .value(1) to turn on — .on() doesn't exist in MicroPython" },
                 ]
             },
             {
@@ -501,22 +543,22 @@
                 description: "Make two LEDs take turns blinking — when one is on, the other is off. They should switch every half second.",
                 circuitHint: "Same circuit as Problem 1: LED1 on GP15, LED2 on GP16.",
                 codeBlocks: [
-                    { id: 'b1', text: "from machine import Pin", indent: 0 },
-                    { id: 'b2', text: "from time import sleep", indent: 0 },
-                    { id: 'b3', text: "led1 = Pin(15, Pin.OUT)", indent: 0 },
-                    { id: 'b4', text: "led2 = Pin(16, Pin.OUT)", indent: 0 },
-                    { id: 'b5', text: "while True:", indent: 0 },
-                    { id: 'b6', text: "led1.value(1)", indent: 1 },
-                    { id: 'b7', text: "led2.value(0)", indent: 1 },
-                    { id: 'b8', text: "sleep(0.5)", indent: 1 },
-                    { id: 'b9', text: "led1.value(0)", indent: 1 },
-                    { id: 'b10', text: "led2.value(1)", indent: 1 },
-                    { id: 'b11', text: "sleep(0.5)", indent: 1 },
+                    { id: 'b1', text: "from machine import Pin", correctIndent: 0 },
+                    { id: 'b2', text: "from time import sleep", correctIndent: 0 },
+                    { id: 'b3', text: "led1 = Pin(15, Pin.OUT)", correctIndent: 0 },
+                    { id: 'b4', text: "led2 = Pin(16, Pin.OUT)", correctIndent: 0 },
+                    { id: 'b5', text: "while True:", correctIndent: 0 },
+                    { id: 'b6', text: "led1.value(1)", correctIndent: 1 },
+                    { id: 'b7', text: "led2.value(0)", correctIndent: 1 },
+                    { id: 'b8', text: "sleep(0.5)", correctIndent: 1 },
+                    { id: 'b9', text: "led1.value(0)", correctIndent: 1 },
+                    { id: 'b10', text: "led2.value(1)", correctIndent: 1 },
+                    { id: 'b11', text: "sleep(0.5)", correctIndent: 1 },
                 ],
                 distractors: [
-                    { id: 'd4', text: "led2 = Pin(16, Pin.OUT)", indent: 1, reason: "Pin setup belongs outside the loop, not indented inside it" },
-                    { id: 'd5', text: "sleep()", indent: 1, reason: "sleep() requires a time argument like sleep(0.5)" },
-                    { id: 'd6', text: "LED1.value(1)", indent: 1, reason: "Python is case-sensitive: 'LED1' is not the same as 'led1'" },
+                    { id: 'd4', text: "led2 = Pin(16, Pin.OUT)", correctIndent: 0, reason: "This line is a duplicate — you already have led2 defined above" },
+                    { id: 'd5', text: "sleep()", correctIndent: 1, reason: "sleep() requires a time argument like sleep(0.5)" },
+                    { id: 'd6', text: "LED1.value(1)", correctIndent: 1, reason: "Python is case-sensitive: 'LED1' is not the same as 'led1'" },
                 ]
             },
             {
@@ -525,27 +567,27 @@
                 description: "Create a 'chase' effect with three LEDs on GP15, GP16, and GP17. Each LED should light up for 0.3 seconds in sequence, then the pattern repeats.",
                 circuitHint: "Add a third LED: LED1 on GP15, LED2 on GP16, LED3 on GP17, each with a resistor.",
                 codeBlocks: [
-                    { id: 'c1', text: "from machine import Pin", indent: 0 },
-                    { id: 'c2', text: "from time import sleep", indent: 0 },
-                    { id: 'c3', text: "led1 = Pin(15, Pin.OUT)", indent: 0 },
-                    { id: 'c4', text: "led2 = Pin(16, Pin.OUT)", indent: 0 },
-                    { id: 'c5', text: "led3 = Pin(17, Pin.OUT)", indent: 0 },
-                    { id: 'c6', text: "while True:", indent: 0 },
-                    { id: 'c7', text: "led1.value(1)", indent: 1 },
-                    { id: 'c8', text: "sleep(0.3)", indent: 1 },
-                    { id: 'c9', text: "led1.value(0)", indent: 1 },
-                    { id: 'c10', text: "led2.value(1)", indent: 1 },
-                    { id: 'c11', text: "sleep(0.3)", indent: 1 },
-                    { id: 'c12', text: "led2.value(0)", indent: 1 },
-                    { id: 'c13', text: "led3.value(1)", indent: 1 },
-                    { id: 'c14', text: "sleep(0.3)", indent: 1 },
-                    { id: 'c15', text: "led3.value(0)", indent: 1 },
+                    { id: 'c1', text: "from machine import Pin", correctIndent: 0 },
+                    { id: 'c2', text: "from time import sleep", correctIndent: 0 },
+                    { id: 'c3', text: "led1 = Pin(15, Pin.OUT)", correctIndent: 0 },
+                    { id: 'c4', text: "led2 = Pin(16, Pin.OUT)", correctIndent: 0 },
+                    { id: 'c5', text: "led3 = Pin(17, Pin.OUT)", correctIndent: 0 },
+                    { id: 'c6', text: "while True:", correctIndent: 0 },
+                    { id: 'c7', text: "led1.value(1)", correctIndent: 1 },
+                    { id: 'c8', text: "sleep(0.3)", correctIndent: 1 },
+                    { id: 'c9', text: "led1.value(0)", correctIndent: 1 },
+                    { id: 'c10', text: "led2.value(1)", correctIndent: 1 },
+                    { id: 'c11', text: "sleep(0.3)", correctIndent: 1 },
+                    { id: 'c12', text: "led2.value(0)", correctIndent: 1 },
+                    { id: 'c13', text: "led3.value(1)", correctIndent: 1 },
+                    { id: 'c14', text: "sleep(0.3)", correctIndent: 1 },
+                    { id: 'c15', text: "led3.value(0)", correctIndent: 1 },
                 ],
                 distractors: [
-                    { id: 'd7', text: "import Pin from machine", indent: 0, reason: "Python import syntax is 'from module import item'" },
-                    { id: 'd8', text: "led3.value(1)", indent: 0, reason: "Code inside the while loop must be indented" },
-                    { id: 'd9', text: "sleep(0.3);", indent: 1, reason: "Python doesn't use semicolons at the end of lines" },
-                    { id: 'd10', text: "led1.write(1)", indent: 1, reason: "The method is .value(), not .write()" },
+                    { id: 'd7', text: "import Pin from machine", correctIndent: 0, reason: "Python import syntax is 'from module import item'" },
+                    { id: 'd8', text: "led3.value(1)", correctIndent: 1, reason: "This is a duplicate line — led3.value(1) already appears in the correct blocks" },
+                    { id: 'd9', text: "sleep(0.3);", correctIndent: 1, reason: "Python doesn't use semicolons at the end of lines" },
+                    { id: 'd10', text: "led1.write(1)", correctIndent: 1, reason: "The method is .value(), not .write()" },
                 ]
             }
         ];
@@ -554,7 +596,7 @@
         let currentProblem = 0;
         let completed = [];
         let availableBlocks = [];
-        let solutionBlocks = [];
+        let solutionBlocks = []; // Now stores {id, indent} objects
         let discardedBlocks = [];
         let draggedBlock = null;
         let attempts = 0;
@@ -589,7 +631,9 @@
             x: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>',
             lightbulb: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M9 18h6M10 22h4M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0018 8 6 6 0 006 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 018.91 14"/></svg>',
             rotate: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>',
-            chevron: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>'
+            chevron: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>',
+            indentLeft: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>',
+            indentRight: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>'
         };
 
         // Render functions
@@ -603,25 +647,60 @@
             }).join('');
         }
 
-        function renderCodeBlock(block, inSolution = false) {
-            const indentClass = block.indent > 0 ? `indent-${block.indent}` : '';
+        function renderCodeBlock(block, area = 'available', solutionIndex = -1) {
+            const problem = problems[currentProblem];
             const distractorClass = showHint && isDistractor(block) ? 'distractor-hint' : '';
             
-            return `
-                <div class="code-block ${indentClass} ${distractorClass}" 
-                     draggable="true" 
-                     data-id="${block.id}"
-                     data-area="${inSolution ? 'solution' : 'available'}">
-                    <span class="grip">${icons.grip}</span>
-                    <code>${escapeHtml(block.text)}</code>
-                </div>
-            `;
+            if (area === 'solution') {
+                // In solution area: show with current indent and controls
+                const solBlock = solutionBlocks[solutionIndex];
+                const indent = solBlock ? solBlock.indent : 0;
+                const indentClass = indent > 0 ? `indent-${indent}` : '';
+                
+                return `
+                    <div class="code-block ${indentClass} ${distractorClass}" 
+                         draggable="true" 
+                         data-id="${block.id}"
+                         data-index="${solutionIndex}"
+                         data-area="solution">
+                        <span class="grip">${icons.grip}</span>
+                        <code>${escapeHtml(block.text)}</code>
+                        <div class="indent-controls">
+                            <button class="indent-btn" onclick="adjustIndent(${solutionIndex}, -1)" ${indent === 0 ? 'disabled' : ''} title="Decrease indent">
+                                ${icons.indentLeft}
+                            </button>
+                            <button class="indent-btn" onclick="adjustIndent(${solutionIndex}, 1)" ${indent >= 3 ? 'disabled' : ''} title="Increase indent">
+                                ${icons.indentRight}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                // In available/discarded area: no indent, no controls
+                return `
+                    <div class="code-block ${distractorClass}" 
+                         draggable="true" 
+                         data-id="${block.id}"
+                         data-area="${area}">
+                        <span class="grip">${icons.grip}</span>
+                        <code>${escapeHtml(block.text)}</code>
+                    </div>
+                `;
+            }
         }
 
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        function adjustIndent(index, delta) {
+            const current = solutionBlocks[index].indent;
+            const newIndent = Math.max(0, Math.min(3, current + delta));
+            solutionBlocks[index].indent = newIndent;
+            clearFeedback();
+            renderProblem();
         }
 
         function renderProblem() {
@@ -644,7 +723,7 @@
                         <div class="block-area available-area" id="availableArea">
                             ${availableBlocks.length === 0 
                                 ? '<p class="empty-message">All blocks placed</p>'
-                                : availableBlocks.map(b => renderCodeBlock(b, false)).join('')
+                                : availableBlocks.map(b => renderCodeBlock(b, 'available')).join('')
                             }
                         </div>
                         <div class="trash-zone" id="trashZone">
@@ -654,16 +733,19 @@
                         ${discardedBlocks.length > 0 ? `
                             <div class="discarded-section">
                                 <h4>Discarded:</h4>
-                                ${discardedBlocks.map(b => renderCodeBlock(b, false)).join('')}
+                                ${discardedBlocks.map(b => renderCodeBlock(b, 'discarded')).join('')}
                             </div>
                         ` : ''}
                     </div>
                     <div class="column">
-                        <h3>Your Solution</h3>
+                        <h3>Your Solution <span>(use ◀ ▶ to indent)</span></h3>
                         <div class="block-area solution-area" id="solutionArea">
                             ${solutionBlocks.length === 0 
                                 ? '<p class="empty-message">Drag code blocks here</p>'
-                                : solutionBlocks.map(b => renderCodeBlock(b, true)).join('')
+                                : solutionBlocks.map((solBlock, index) => {
+                                    const block = findBlock(solBlock.id);
+                                    return renderCodeBlock(block, 'solution', index);
+                                }).join('')
                             }
                         </div>
                     </div>
@@ -714,9 +796,10 @@
             lines.push(`# ${problem.description}`);
             lines.push('');
             
-            // Generate code from correct blocks with proper indentation
-            problem.codeBlocks.forEach(block => {
-                const indent = '    '.repeat(block.indent); // 4 spaces per indent level
+            // Generate code from solution blocks with their indentation
+            solutionBlocks.forEach(sb => {
+                const block = findBlock(sb.id);
+                const indent = '    '.repeat(sb.indent); // 4 spaces per indent level
                 lines.push(indent + block.text);
             });
             
@@ -837,14 +920,14 @@
             
             if (!draggedBlock) return;
             
-            const targetId = e.target.closest('.code-block').dataset.id;
-            const targetArea = e.target.closest('.code-block').dataset.area;
+            const targetEl = e.target.closest('.code-block');
+            const targetArea = targetEl.dataset.area;
             
             if (targetArea === 'solution') {
                 // Insert before target in solution
+                const targetIndex = parseInt(targetEl.dataset.index);
                 removeBlockFromAll(draggedBlock.id);
-                const targetIndex = solutionBlocks.findIndex(b => b.id === targetId);
-                solutionBlocks.splice(targetIndex, 0, draggedBlock);
+                solutionBlocks.splice(targetIndex, 0, { id: draggedBlock.id, indent: 0 });
                 clearFeedback();
                 renderProblem();
             }
@@ -855,7 +938,9 @@
             if (!draggedBlock) return;
             
             removeBlockFromAll(draggedBlock.id);
-            availableBlocks.push(draggedBlock);
+            if (!availableBlocks.find(b => b.id === draggedBlock.id)) {
+                availableBlocks.push(draggedBlock);
+            }
             clearFeedback();
             renderProblem();
         }
@@ -865,7 +950,7 @@
             if (!draggedBlock) return;
             
             removeBlockFromAll(draggedBlock.id);
-            solutionBlocks.push(draggedBlock);
+            solutionBlocks.push({ id: draggedBlock.id, indent: 0 });
             clearFeedback();
             renderProblem();
         }
@@ -876,7 +961,9 @@
             if (!draggedBlock) return;
             
             removeBlockFromAll(draggedBlock.id);
-            discardedBlocks.push(draggedBlock);
+            if (!discardedBlocks.find(b => b.id === draggedBlock.id)) {
+                discardedBlocks.push(draggedBlock);
+            }
             clearFeedback();
             renderProblem();
         }
@@ -888,7 +975,7 @@
 
         function removeBlockFromAll(id) {
             availableBlocks = availableBlocks.filter(b => b.id !== id);
-            solutionBlocks = solutionBlocks.filter(b => b.id !== id);
+            solutionBlocks = solutionBlocks.filter(sb => sb.id !== id);
             discardedBlocks = discardedBlocks.filter(b => b.id !== id);
         }
 
@@ -916,7 +1003,7 @@
 
             // Check for distractors
             const distractorIds = problem.distractors.map(d => d.id);
-            const distractorsInSolution = solutionBlocks.filter(b => distractorIds.includes(b.id));
+            const distractorsInSolution = solutionBlocks.filter(sb => distractorIds.includes(sb.id));
             
             if (distractorsInSolution.length > 0) {
                 const distractor = problem.distractors.find(d => d.id === distractorsInSolution[0].id);
@@ -931,15 +1018,36 @@
             }
 
             // Check order
-            const isCorrect = solutionBlocks.every((block, index) => 
-                block.id === problem.codeBlocks[index].id
+            const orderCorrect = solutionBlocks.every((sb, index) => 
+                sb.id === problem.codeBlocks[index].id
             );
 
-            if (isCorrect) {
-                showFeedback(true, "Excellent! Your code is correct!");
-            } else {
+            if (!orderCorrect) {
                 showFeedback(false, "The blocks are in the wrong order. Think about what needs to happen first.");
+                return;
             }
+
+            // Check indentation
+            const indentErrors = [];
+            solutionBlocks.forEach((sb, index) => {
+                const correctBlock = problem.codeBlocks[index];
+                if (sb.indent !== correctBlock.correctIndent) {
+                    indentErrors.push({
+                        text: correctBlock.text,
+                        got: sb.indent,
+                        expected: correctBlock.correctIndent
+                    });
+                }
+            });
+
+            if (indentErrors.length > 0) {
+                const err = indentErrors[0];
+                const direction = err.got < err.expected ? "needs more indentation" : "has too much indentation";
+                showFeedback(false, `Indentation error: "${err.text}" ${direction}. In Python, code inside a loop must be indented.`);
+                return;
+            }
+
+            showFeedback(true, "Excellent! Your code is correct — including the indentation!");
         }
 
         function resetProblem() {
