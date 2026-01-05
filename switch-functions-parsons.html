@@ -640,10 +640,17 @@ red.freq(1000)
 green.freq(1000)
 blue.freq(1000)
 
-def color_set(r, g, b):
-    red.duty_u16(int(r * 257))
-    green.duty_u16(int(g * 257))
-    blue.duty_u16(int(b * 257))`,
+def interval_mapping(x, in_min, in_max, out_min, out_max):
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+
+def color_to_duty(rgb_value):
+    rgb_value = int(interval_mapping(rgb_value, 0, 255, 0, 65535))
+    return rgb_value
+
+def color_set(red_value, green_value, blue_value):
+    red.duty_u16(color_to_duty(red_value))
+    green.duty_u16(color_to_duty(green_value))
+    blue.duty_u16(color_to_duty(blue_value))`,
                 staticCodeHighlighted: `<span class="keyword">from</span> machine <span class="keyword">import</span> Pin, PWM
 <span class="keyword">from</span> time <span class="keyword">import</span> sleep
 
@@ -663,10 +670,17 @@ red.<span class="function">freq</span>(<span class="number">1000</span>)
 green.<span class="function">freq</span>(<span class="number">1000</span>)
 blue.<span class="function">freq</span>(<span class="number">1000</span>)
 
-<span class="keyword">def</span> <span class="function">color_set</span>(r, g, b):
-    red.<span class="function">duty_u16</span>(<span class="function">int</span>(r * <span class="number">257</span>))
-    green.<span class="function">duty_u16</span>(<span class="function">int</span>(g * <span class="number">257</span>))
-    blue.<span class="function">duty_u16</span>(<span class="function">int</span>(b * <span class="number">257</span>))`,
+<span class="keyword">def</span> <span class="function">interval_mapping</span>(x, in_min, in_max, out_min, out_max):
+    <span class="keyword">return</span> (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+
+<span class="keyword">def</span> <span class="function">color_to_duty</span>(rgb_value):
+    rgb_value = <span class="function">int</span>(<span class="function">interval_mapping</span>(rgb_value, <span class="number">0</span>, <span class="number">255</span>, <span class="number">0</span>, <span class="number">65535</span>))
+    <span class="keyword">return</span> rgb_value
+
+<span class="keyword">def</span> <span class="function">color_set</span>(red_value, green_value, blue_value):
+    red.<span class="function">duty_u16</span>(<span class="function">color_to_duty</span>(red_value))
+    green.<span class="function">duty_u16</span>(<span class="function">color_to_duty</span>(green_value))
+    blue.<span class="function">duty_u16</span>(<span class="function">color_to_duty</span>(blue_value))`,
                 codeBlocks: [
                     { id: 'c1', text: "def led_chase():", correctIndent: 0 },
                     { id: 'c2', text: "led1.value(1)", correctIndent: 1 },
@@ -923,7 +937,7 @@ blue.<span class="function">freq</span>(<span class="number">1000</span>)
         function highlightSyntax(code) {
             return code
                 .replace(/\b(from|import|while|True|False|if|else|elif|for|in|def|return|and|or|not)\b/g, '<span class="keyword">$1</span>')
-                .replace(/\b(Pin|PWM|sleep|value|print|freq|duty_u16|color_set|led_chase|show_color|show_left|show_right|int)\b/g, '<span class="function">$1</span>')
+                .replace(/\b(Pin|PWM|sleep|value|print|freq|duty_u16|color_set|color_to_duty|interval_mapping|led_chase|show_color|show_left|show_right|int)\b/g, '<span class="function">$1</span>')
                 .replace(/\b(\d+\.?\d*)\b/g, '<span class="number">$1</span>')
                 .replace(/(#.*)/g, '<span class="comment">$1</span>');
         }
