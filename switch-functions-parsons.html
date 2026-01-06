@@ -303,6 +303,40 @@
             color: #64748b;
         }
 
+        .move-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            margin-right: 0.25rem;
+        }
+
+        .move-btn {
+            width: 1.25rem;
+            height: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: #64748b;
+            border-radius: 0.2rem;
+            cursor: pointer;
+            font-size: 0.625rem;
+            transition: all 0.15s;
+            padding: 0;
+        }
+
+        .move-btn:hover {
+            background: #e2e8f0;
+            border-color: #94a3b8;
+            color: #334155;
+        }
+
+        .move-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
         .trash-zone {
             display: flex;
             align-items: center;
@@ -544,7 +578,7 @@
         </div>
 
         <footer>
-            Drag blocks to build your solution • Use arrow buttons to set indentation • Discard distractors in the trash
+            Drag blocks or use ▲▼ to reorder • Use ◀▶ to set indentation • Discard distractors in the trash
         </footer>
     </div>
 
@@ -796,6 +830,8 @@ blue.<span class="function">freq</span>(<span class="number">1000</span>)
                 const solBlock = solutionBlocks[solutionIndex];
                 const indent = solBlock ? solBlock.indent : 0;
                 const indentClass = indent > 0 ? `indent-${indent}` : '';
+                const isFirst = solutionIndex === 0;
+                const isLast = solutionIndex === solutionBlocks.length - 1;
                 
                 return `
                     <div class="code-block ${indentClass} ${distractorClass}" 
@@ -803,6 +839,10 @@ blue.<span class="function">freq</span>(<span class="number">1000</span>)
                          data-id="${block.id}"
                          data-index="${solutionIndex}"
                          data-area="solution">
+                        <div class="move-controls">
+                            <button class="move-btn" onclick="moveBlock(${solutionIndex}, -1)" ${isFirst ? 'disabled' : ''} title="Move up">▲</button>
+                            <button class="move-btn" onclick="moveBlock(${solutionIndex}, 1)" ${isLast ? 'disabled' : ''} title="Move down">▼</button>
+                        </div>
                         <span class="grip">${icons.grip}</span>
                         <code>${escapeHtml(block.text)}</code>
                         <div class="indent-controls">
@@ -838,6 +878,19 @@ blue.<span class="function">freq</span>(<span class="number">1000</span>)
             const current = solutionBlocks[index].indent;
             const newIndent = Math.max(0, Math.min(3, current + delta));
             solutionBlocks[index].indent = newIndent;
+            clearFeedback();
+            renderProblem();
+        }
+
+        function moveBlock(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= solutionBlocks.length) return;
+            
+            // Swap the blocks
+            const temp = solutionBlocks[index];
+            solutionBlocks[index] = solutionBlocks[newIndex];
+            solutionBlocks[newIndex] = temp;
+            
             clearFeedback();
             renderProblem();
         }
@@ -1139,28 +1192,50 @@ blue.<span class="function">freq</span>(<span class="number">1000</span>)
 
         // Flexible order validation for Problem 3
         function validateFlexibleOrder(solutionBlocks, problem) {
-            const ids = solutionBlocks.map(sb => sb.id);
             const config = problem.flexibleOrder;
             
-            // Check each required group is present and contiguous in correct internal order
+            // Build solution texts array
+            const solutionTexts = solutionBlocks.map(sb => {
+                const block = findBlock(sb.id);
+                return block.text;
+            });
+            
+            // Build expected texts for each group
+            const groupTexts = {};
             for (const group of config.groups) {
-                const startPos = ids.indexOf(group.ids[0]);
+                groupTexts[group.name] = group.ids.map(id => {
+                    const block = problem.codeBlocks.find(cb => cb.id === id);
+                    return block.text;
+                });
+            }
+            
+            // Check each required group is present and contiguous in correct internal order (by TEXT)
+            for (const group of config.groups) {
+                const expectedTexts = groupTexts[group.name];
+                const firstText = expectedTexts[0];
+                
+                // Find where this group starts in solution
+                const startPos = solutionTexts.indexOf(firstText);
                 if (startPos === -1) {
                     return { valid: false, message: `Missing the start of ${group.name}` };
                 }
                 
-                // Check the group's blocks are contiguous and in order
-                for (let i = 0; i < group.ids.length; i++) {
-                    if (ids[startPos + i] !== group.ids[i]) {
+                // Check the group's blocks are contiguous and in order BY TEXT
+                for (let i = 0; i < expectedTexts.length; i++) {
+                    if (solutionTexts[startPos + i] !== expectedTexts[i]) {
                         return { valid: false, message: `The ${group.name} blocks are not in the correct order. Keep all the function's code together.` };
                     }
                 }
             }
             
-            // Check ordering constraints (e.g., functions before while)
+            // Check ordering constraints (e.g., functions before while) - by text
             for (const constraint of config.orderConstraints) {
-                const beforePos = ids.indexOf(constraint.before);
-                const afterPos = ids.indexOf(constraint.after);
+                const beforeBlock = problem.codeBlocks.find(cb => cb.id === constraint.before);
+                const afterBlock = problem.codeBlocks.find(cb => cb.id === constraint.after);
+                
+                const beforePos = solutionTexts.indexOf(beforeBlock.text);
+                const afterPos = solutionTexts.indexOf(afterBlock.text);
+                
                 if (beforePos === -1 || afterPos === -1) {
                     continue; // Missing blocks caught elsewhere
                 }
@@ -1171,37 +1246,44 @@ blue.<span class="function">freq</span>(<span class="number">1000</span>)
             
             // Check the main loop structure allows swapped function calls
             if (config.swappableInLoop) {
-                const whilePos = ids.indexOf(config.swappableInLoop.whileId);
-                const callIds = config.swappableInLoop.callIds;
+                const whileBlock = problem.codeBlocks.find(cb => cb.id === config.swappableInLoop.whileId);
+                const ifBlock = problem.codeBlocks.find(cb => cb.id === config.swappableInLoop.ifId);
+                const elseBlock = problem.codeBlocks.find(cb => cb.id === config.swappableInLoop.elseId);
+                const callTexts = config.swappableInLoop.callIds.map(id => {
+                    const block = problem.codeBlocks.find(cb => cb.id === id);
+                    return block.text;
+                });
+                
+                const whilePos = solutionTexts.indexOf(whileBlock.text);
                 
                 if (whilePos === -1) {
                     return { valid: false, message: "Missing 'while True:'" };
                 }
                 
                 // Check if statement comes right after while
-                if (ids[whilePos + 1] !== config.swappableInLoop.ifId) {
+                if (solutionTexts[whilePos + 1] !== ifBlock.text) {
                     return { valid: false, message: "The if statement should come right after while True:" };
                 }
                 
                 // Check if branch has a valid function call
-                const ifBranchCall = ids[whilePos + 2];
-                if (!callIds.includes(ifBranchCall)) {
+                const ifBranchText = solutionTexts[whilePos + 2];
+                if (!callTexts.includes(ifBranchText)) {
                     return { valid: false, message: "The if branch should contain a function call (led_chase() or show_color())" };
                 }
                 
                 // Check else comes next
-                if (ids[whilePos + 3] !== config.swappableInLoop.elseId) {
+                if (solutionTexts[whilePos + 3] !== elseBlock.text) {
                     return { valid: false, message: "else: should come after the if branch's function call" };
                 }
                 
                 // Check else branch has a valid function call
-                const elseBranchCall = ids[whilePos + 4];
-                if (!callIds.includes(elseBranchCall)) {
+                const elseBranchText = solutionTexts[whilePos + 4];
+                if (!callTexts.includes(elseBranchText)) {
                     return { valid: false, message: "The else branch should contain a function call (led_chase() or show_color())" };
                 }
                 
                 // Check different functions are called in each branch
-                if (ifBranchCall === elseBranchCall) {
+                if (ifBranchText === elseBranchText) {
                     return { valid: false, message: "Call different functions in the if and else branches" };
                 }
             }
@@ -1212,9 +1294,52 @@ blue.<span class="function">freq</span>(<span class="number">1000</span>)
         function validateFlexibleIndent(solutionBlocks, problem) {
             const config = problem.flexibleOrder;
             
-            for (const sb of solutionBlocks) {
-                const expectedIndent = config.expectedIndents[sb.id];
-                if (sb.indent !== expectedIndent) {
+            // Build a map of text -> expected indent for each position in the solution
+            // Since we already validated order by text, we can match position to expected indent
+            
+            // First, figure out where each group starts in the solution
+            const solutionTexts = solutionBlocks.map(sb => {
+                const block = findBlock(sb.id);
+                return block.text;
+            });
+            
+            // Build position -> expected indent mapping
+            const positionIndents = {};
+            
+            // Process each group to find where it appears
+            for (const group of config.groups) {
+                const groupBlockTexts = group.ids.map(id => {
+                    return problem.codeBlocks.find(cb => cb.id === id).text;
+                });
+                const firstText = groupBlockTexts[0];
+                const startPos = solutionTexts.indexOf(firstText);
+                
+                // Map positions within this group
+                for (let i = 0; i < group.ids.length; i++) {
+                    const expectedIndent = config.expectedIndents[group.ids[i]];
+                    positionIndents[startPos + i] = expectedIndent;
+                }
+            }
+            
+            // Add the main loop structure positions
+            if (config.swappableInLoop) {
+                const whileBlock = problem.codeBlocks.find(cb => cb.id === config.swappableInLoop.whileId);
+                const whilePos = solutionTexts.indexOf(whileBlock.text);
+                
+                // while, if, call, else, call
+                positionIndents[whilePos] = config.expectedIndents[config.swappableInLoop.whileId];
+                positionIndents[whilePos + 1] = config.expectedIndents[config.swappableInLoop.ifId];
+                positionIndents[whilePos + 2] = 2; // function call indent
+                positionIndents[whilePos + 3] = config.expectedIndents[config.swappableInLoop.elseId];
+                positionIndents[whilePos + 4] = 2; // function call indent
+            }
+            
+            // Now check each position
+            for (let i = 0; i < solutionBlocks.length; i++) {
+                const sb = solutionBlocks[i];
+                const expectedIndent = positionIndents[i];
+                
+                if (expectedIndent !== undefined && sb.indent !== expectedIndent) {
                     const block = findBlock(sb.id);
                     const direction = sb.indent < expectedIndent ? "needs more indentation" : "has too much indentation";
                     return { valid: false, message: `Indentation error: "${block.text}" ${direction}. Code inside functions and if/else blocks must be indented.` };
@@ -1264,25 +1389,36 @@ blue.<span class="function">freq</span>(<span class="number">1000</span>)
                     return;
                 }
             } else {
-                // Exact order check
-                const orderCorrect = solutionBlocks.every((sb, index) => 
-                    sb.id === problem.codeBlocks[index].id
-                );
+                // Compare by TEXT, not IDs (handles identical-text blocks like multiple sleep() calls)
+                const expectedTexts = problem.codeBlocks.map(cb => cb.text);
+                const solutionTexts = solutionBlocks.map(sb => {
+                    const block = findBlock(sb.id);
+                    return block.text;
+                });
+                
+                let orderCorrect = true;
+                for (let i = 0; i < expectedTexts.length; i++) {
+                    if (solutionTexts[i] !== expectedTexts[i]) {
+                        orderCorrect = false;
+                        break;
+                    }
+                }
 
                 if (!orderCorrect) {
                     showFeedback(false, "The blocks are in the wrong order. Think about what needs to be defined before it can be used.");
                     return;
                 }
 
-                // Exact indentation check
+                // Check indentation by position (since text matches, position determines expected indent)
                 const indentErrors = [];
                 solutionBlocks.forEach((sb, index) => {
-                    const correctBlock = problem.codeBlocks[index];
-                    if (sb.indent !== correctBlock.correctIndent) {
+                    const expectedBlock = problem.codeBlocks[index];
+                    if (sb.indent !== expectedBlock.correctIndent) {
+                        const block = findBlock(sb.id);
                         indentErrors.push({
-                            text: correctBlock.text,
+                            text: block.text,
                             got: sb.indent,
-                            expected: correctBlock.correctIndent
+                            expected: expectedBlock.correctIndent
                         });
                     }
                 });
