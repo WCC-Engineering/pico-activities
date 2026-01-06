@@ -556,7 +556,7 @@
                     { id: 'b11', text: "sleep(0.5)", correctIndent: 1 },
                 ],
                 distractors: [
-                    { id: 'd4', text: "led2 = Pin(16, Pin.OUT)", correctIndent: 0, reason: "This line is a duplicate — you already have led2 defined above" },
+                    { id: 'd4', text: "led2 = Pin(16, Pin.IN)", correctIndent: 0, reason: "Use Pin.OUT for LEDs — Pin.IN is for reading inputs like buttons" },
                     { id: 'd5', text: "sleep()", correctIndent: 1, reason: "sleep() requires a time argument like sleep(0.5)" },
                     { id: 'd6', text: "LED1.value(1)", correctIndent: 1, reason: "Python is case-sensitive: 'LED1' is not the same as 'led1'" },
                 ]
@@ -585,7 +585,7 @@
                 ],
                 distractors: [
                     { id: 'd7', text: "import Pin from machine", correctIndent: 0, reason: "Python import syntax is 'from module import item'" },
-                    { id: 'd8', text: "led3.value(1)", correctIndent: 1, reason: "This is a duplicate line — led3.value(1) already appears in the correct blocks" },
+                    { id: 'd8', text: "led3.value(HIGH)", correctIndent: 1, reason: "Use 1 or 0 for pin values, not HIGH/LOW — that's Arduino syntax" },
                     { id: 'd9', text: "sleep(0.3);", correctIndent: 1, reason: "Python doesn't use semicolons at the end of lines" },
                     { id: 'd10', text: "led1.write(1)", correctIndent: 1, reason: "The method is .value(), not .write()" },
                 ]
