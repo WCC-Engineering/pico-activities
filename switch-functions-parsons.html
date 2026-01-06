@@ -619,7 +619,7 @@ switch = <span class="function">Pin</span>(<span class="number">14</span>, Pin.I
             {
                 id: 3,
                 title: "Switch Selects LED Chase vs. RGB Color",
-                description: "Create led_chase() that lights three LEDs in sequence, and show_color() that displays a color on the RGB LED. The switch selects which runs.",
+                description: "Create two light show functions: led_chase() lights three LEDs in sequence with 0.2s timing, and show_color() displays two RGB colors with 0.5s timing. Put all the timing (sleep) inside each function. The switch selects which function runs.",
                 circuitHint: "Switch on GP14. Regular LEDs on GP15-17. RGB LED: Red=GP13, Green=GP18, Blue=GP19.",
                 staticCode: `from machine import Pin, PWM
 from time import sleep
@@ -708,7 +708,28 @@ blue.<span class="function">freq</span>(<span class="number">1000</span>)
                     { id: 'd8', text: "color_set(255, 0, 128)", correctIndent: 0, reason: "This should be inside the show_color() function, not at the top level" },
                     { id: 'd9', text: "red.value(255)", correctIndent: 1, reason: "RGB LED uses PWM — use color_set() or duty_u16(), not value()" },
                     { id: 'd10', text: "def led_chase()", correctIndent: 0, reason: "Function definitions need a colon at the end" },
-                ]
+                ],
+                flexibleOrder: {
+                    groups: [
+                        { name: "led_chase() function", ids: ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10'] },
+                        { name: "show_color() function", ids: ['c11', 'c12', 'c13', 'c14', 'c15'] }
+                    ],
+                    orderConstraints: [
+                        { before: 'c1', after: 'c16', message: "def led_chase(): must come before the while loop" },
+                        { before: 'c11', after: 'c16', message: "def show_color(): must come before the while loop" }
+                    ],
+                    swappableInLoop: {
+                        whileId: 'c16',
+                        ifId: 'c17',
+                        elseId: 'c19',
+                        callIds: ['c18', 'c20']
+                    },
+                    expectedIndents: {
+                        'c1': 0, 'c2': 1, 'c3': 1, 'c4': 1, 'c5': 1, 'c6': 1, 'c7': 1, 'c8': 1, 'c9': 1, 'c10': 1,
+                        'c11': 0, 'c12': 1, 'c13': 1, 'c14': 1, 'c15': 1,
+                        'c16': 0, 'c17': 1, 'c18': 2, 'c19': 1, 'c20': 2
+                    }
+                }
             }
         ];
 
@@ -1116,6 +1137,93 @@ blue.<span class="function">freq</span>(<span class="number">1000</span>)
             if (nextBtn) nextBtn.classList.add('hidden');
         }
 
+        // Flexible order validation for Problem 3
+        function validateFlexibleOrder(solutionBlocks, problem) {
+            const ids = solutionBlocks.map(sb => sb.id);
+            const config = problem.flexibleOrder;
+            
+            // Check each required group is present and contiguous in correct internal order
+            for (const group of config.groups) {
+                const startPos = ids.indexOf(group.ids[0]);
+                if (startPos === -1) {
+                    return { valid: false, message: `Missing the start of ${group.name}` };
+                }
+                
+                // Check the group's blocks are contiguous and in order
+                for (let i = 0; i < group.ids.length; i++) {
+                    if (ids[startPos + i] !== group.ids[i]) {
+                        return { valid: false, message: `The ${group.name} blocks are not in the correct order. Keep all the function's code together.` };
+                    }
+                }
+            }
+            
+            // Check ordering constraints (e.g., functions before while)
+            for (const constraint of config.orderConstraints) {
+                const beforePos = ids.indexOf(constraint.before);
+                const afterPos = ids.indexOf(constraint.after);
+                if (beforePos === -1 || afterPos === -1) {
+                    continue; // Missing blocks caught elsewhere
+                }
+                if (beforePos > afterPos) {
+                    return { valid: false, message: constraint.message };
+                }
+            }
+            
+            // Check the main loop structure allows swapped function calls
+            if (config.swappableInLoop) {
+                const whilePos = ids.indexOf(config.swappableInLoop.whileId);
+                const callIds = config.swappableInLoop.callIds;
+                
+                if (whilePos === -1) {
+                    return { valid: false, message: "Missing 'while True:'" };
+                }
+                
+                // Check if statement comes right after while
+                if (ids[whilePos + 1] !== config.swappableInLoop.ifId) {
+                    return { valid: false, message: "The if statement should come right after while True:" };
+                }
+                
+                // Check if branch has a valid function call
+                const ifBranchCall = ids[whilePos + 2];
+                if (!callIds.includes(ifBranchCall)) {
+                    return { valid: false, message: "The if branch should contain a function call (led_chase() or show_color())" };
+                }
+                
+                // Check else comes next
+                if (ids[whilePos + 3] !== config.swappableInLoop.elseId) {
+                    return { valid: false, message: "else: should come after the if branch's function call" };
+                }
+                
+                // Check else branch has a valid function call
+                const elseBranchCall = ids[whilePos + 4];
+                if (!callIds.includes(elseBranchCall)) {
+                    return { valid: false, message: "The else branch should contain a function call (led_chase() or show_color())" };
+                }
+                
+                // Check different functions are called in each branch
+                if (ifBranchCall === elseBranchCall) {
+                    return { valid: false, message: "Call different functions in the if and else branches" };
+                }
+            }
+            
+            return { valid: true };
+        }
+
+        function validateFlexibleIndent(solutionBlocks, problem) {
+            const config = problem.flexibleOrder;
+            
+            for (const sb of solutionBlocks) {
+                const expectedIndent = config.expectedIndents[sb.id];
+                if (sb.indent !== expectedIndent) {
+                    const block = findBlock(sb.id);
+                    const direction = sb.indent < expectedIndent ? "needs more indentation" : "has too much indentation";
+                    return { valid: false, message: `Indentation error: "${block.text}" ${direction}. Code inside functions and if/else blocks must be indented.` };
+                }
+            }
+            
+            return { valid: true };
+        }
+
         // Actions
         function checkSolution() {
             attempts++;
@@ -1141,34 +1249,50 @@ blue.<span class="function">freq</span>(<span class="number">1000</span>)
                 return;
             }
 
-            // Check order
-            const orderCorrect = solutionBlocks.every((sb, index) => 
-                sb.id === problem.codeBlocks[index].id
-            );
-
-            if (!orderCorrect) {
-                showFeedback(false, "The blocks are in the wrong order. Think about what needs to be defined before it can be used.");
-                return;
-            }
-
-            // Check indentation
-            const indentErrors = [];
-            solutionBlocks.forEach((sb, index) => {
-                const correctBlock = problem.codeBlocks[index];
-                if (sb.indent !== correctBlock.correctIndent) {
-                    indentErrors.push({
-                        text: correctBlock.text,
-                        got: sb.indent,
-                        expected: correctBlock.correctIndent
-                    });
+            // Check order - use flexible validation if configured
+            if (problem.flexibleOrder) {
+                const orderResult = validateFlexibleOrder(solutionBlocks, problem);
+                if (!orderResult.valid) {
+                    showFeedback(false, orderResult.message);
+                    return;
                 }
-            });
+                
+                // Check indentation using flexible rules
+                const indentResult = validateFlexibleIndent(solutionBlocks, problem);
+                if (!indentResult.valid) {
+                    showFeedback(false, indentResult.message);
+                    return;
+                }
+            } else {
+                // Exact order check
+                const orderCorrect = solutionBlocks.every((sb, index) => 
+                    sb.id === problem.codeBlocks[index].id
+                );
 
-            if (indentErrors.length > 0) {
-                const err = indentErrors[0];
-                const direction = err.got < err.expected ? "needs more indentation" : "has too much indentation";
-                showFeedback(false, `Indentation error: "${err.text}" ${direction}. Code inside functions and if/else blocks must be indented.`);
-                return;
+                if (!orderCorrect) {
+                    showFeedback(false, "The blocks are in the wrong order. Think about what needs to be defined before it can be used.");
+                    return;
+                }
+
+                // Exact indentation check
+                const indentErrors = [];
+                solutionBlocks.forEach((sb, index) => {
+                    const correctBlock = problem.codeBlocks[index];
+                    if (sb.indent !== correctBlock.correctIndent) {
+                        indentErrors.push({
+                            text: correctBlock.text,
+                            got: sb.indent,
+                            expected: correctBlock.correctIndent
+                        });
+                    }
+                });
+
+                if (indentErrors.length > 0) {
+                    const err = indentErrors[0];
+                    const direction = err.got < err.expected ? "needs more indentation" : "has too much indentation";
+                    showFeedback(false, `Indentation error: "${err.text}" ${direction}. Code inside functions and if/else blocks must be indented.`);
+                    return;
+                }
             }
 
             showFeedback(true, "Excellent! Your code is correct — including the indentation!");
