@@ -1020,30 +1020,41 @@
                 return;
             }
 
-            // Check order (with swappable imports support)
+            // Check order by comparing TEXT, not IDs (handles identical-text blocks)
+            // Also handle swappable imports
             let orderCorrect = true;
             
+            // Build expected text array
+            const expectedTexts = problem.codeBlocks.map(cb => cb.text);
+            const solutionTexts = solutionBlocks.map(sb => {
+                const block = findBlock(sb.id);
+                return block.text;
+            });
+            
             if (problem.swappableImports) {
-                // Check first two blocks are the swappable imports (in either order)
-                const firstTwoIds = [solutionBlocks[0].id, solutionBlocks[1].id];
-                const swappable = problem.swappableImports;
+                // First two can be in either order
+                const firstTwoExpected = [expectedTexts[0], expectedTexts[1]].sort();
+                const firstTwoSolution = [solutionTexts[0], solutionTexts[1]].sort();
                 
-                if (!((firstTwoIds[0] === swappable[0] && firstTwoIds[1] === swappable[1]) ||
-                      (firstTwoIds[0] === swappable[1] && firstTwoIds[1] === swappable[0]))) {
+                if (firstTwoExpected[0] !== firstTwoSolution[0] || firstTwoExpected[1] !== firstTwoSolution[1]) {
                     orderCorrect = false;
                 }
                 
-                // Check remaining blocks are in exact order
-                for (let i = 2; i < solutionBlocks.length; i++) {
-                    if (solutionBlocks[i].id !== problem.codeBlocks[i].id) {
+                // Rest must match exactly
+                for (let i = 2; i < expectedTexts.length; i++) {
+                    if (solutionTexts[i] !== expectedTexts[i]) {
                         orderCorrect = false;
                         break;
                     }
                 }
             } else {
-                orderCorrect = solutionBlocks.every((sb, index) => 
-                    sb.id === problem.codeBlocks[index].id
-                );
+                // All must match exactly by text
+                for (let i = 0; i < expectedTexts.length; i++) {
+                    if (solutionTexts[i] !== expectedTexts[i]) {
+                        orderCorrect = false;
+                        break;
+                    }
+                }
             }
 
             if (!orderCorrect) {
@@ -1051,15 +1062,17 @@
                 return;
             }
 
-            // Check indentation (look up correct indent by block id, not position)
+            // Check indentation by looking up expected indent from codeBlocks by matching text
             const indentErrors = [];
-            solutionBlocks.forEach((sb) => {
-                const correctBlock = problem.codeBlocks.find(cb => cb.id === sb.id);
-                if (sb.indent !== correctBlock.correctIndent) {
+            solutionBlocks.forEach((sb, index) => {
+                const block = findBlock(sb.id);
+                // Find the expected indent for this position's text
+                const expectedBlock = problem.codeBlocks[index];
+                if (sb.indent !== expectedBlock.correctIndent) {
                     indentErrors.push({
-                        text: correctBlock.text,
+                        text: block.text,
                         got: sb.indent,
-                        expected: correctBlock.correctIndent
+                        expected: expectedBlock.correctIndent
                     });
                 }
             });
