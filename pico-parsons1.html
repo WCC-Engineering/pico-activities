@@ -535,7 +535,8 @@
                     { id: 'd1', text: "led1 = Pin(15, Pin.IN)", correctIndent: 0, reason: "Pin.IN is for reading inputs, not controlling outputs" },
                     { id: 'd2', text: "from time import wait", correctIndent: 0, reason: "The function is called 'sleep', not 'wait'" },
                     { id: 'd3', text: "led1.on()", correctIndent: 1, reason: "Use .value(1) to turn on — .on() doesn't exist in MicroPython" },
-                ]
+                ],
+                swappableImports: ['a1', 'a2']
             },
             {
                 id: 2,
@@ -559,7 +560,8 @@
                     { id: 'd4', text: "led2 = Pin(16, Pin.IN)", correctIndent: 0, reason: "Use Pin.OUT for LEDs — Pin.IN is for reading inputs like buttons" },
                     { id: 'd5', text: "sleep()", correctIndent: 1, reason: "sleep() requires a time argument like sleep(0.5)" },
                     { id: 'd6', text: "LED1.value(1)", correctIndent: 1, reason: "Python is case-sensitive: 'LED1' is not the same as 'led1'" },
-                ]
+                ],
+                swappableImports: ['b1', 'b2']
             },
             {
                 id: 3,
@@ -588,7 +590,8 @@
                     { id: 'd8', text: "led3.value(HIGH)", correctIndent: 1, reason: "Use 1 or 0 for pin values, not HIGH/LOW — that's Arduino syntax" },
                     { id: 'd9', text: "sleep(0.3);", correctIndent: 1, reason: "Python doesn't use semicolons at the end of lines" },
                     { id: 'd10', text: "led1.write(1)", correctIndent: 1, reason: "The method is .value(), not .write()" },
-                ]
+                ],
+                swappableImports: ['c1', 'c2']
             }
         ];
 
@@ -1017,20 +1020,41 @@
                 return;
             }
 
-            // Check order
-            const orderCorrect = solutionBlocks.every((sb, index) => 
-                sb.id === problem.codeBlocks[index].id
-            );
+            // Check order (with swappable imports support)
+            let orderCorrect = true;
+            
+            if (problem.swappableImports) {
+                // Check first two blocks are the swappable imports (in either order)
+                const firstTwoIds = [solutionBlocks[0].id, solutionBlocks[1].id];
+                const swappable = problem.swappableImports;
+                
+                if (!((firstTwoIds[0] === swappable[0] && firstTwoIds[1] === swappable[1]) ||
+                      (firstTwoIds[0] === swappable[1] && firstTwoIds[1] === swappable[0]))) {
+                    orderCorrect = false;
+                }
+                
+                // Check remaining blocks are in exact order
+                for (let i = 2; i < solutionBlocks.length; i++) {
+                    if (solutionBlocks[i].id !== problem.codeBlocks[i].id) {
+                        orderCorrect = false;
+                        break;
+                    }
+                }
+            } else {
+                orderCorrect = solutionBlocks.every((sb, index) => 
+                    sb.id === problem.codeBlocks[index].id
+                );
+            }
 
             if (!orderCorrect) {
                 showFeedback(false, "The blocks are in the wrong order. Think about what needs to happen first.");
                 return;
             }
 
-            // Check indentation
+            // Check indentation (look up correct indent by block id, not position)
             const indentErrors = [];
-            solutionBlocks.forEach((sb, index) => {
-                const correctBlock = problem.codeBlocks[index];
+            solutionBlocks.forEach((sb) => {
+                const correctBlock = problem.codeBlocks.find(cb => cb.id === sb.id);
                 if (sb.indent !== correctBlock.correctIndent) {
                     indentErrors.push({
                         text: correctBlock.text,
