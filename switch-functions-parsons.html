@@ -705,7 +705,7 @@ blue.<span class="function">freq</span>(<span class="number">1000</span>)
                 ],
                 distractors: [
                     { id: 'd7', text: "led1.value(1)", correctIndent: 0, reason: "Code inside a function must be indented under the def line" },
-                    { id: 'd8', text: "color_set(255, 0, 128)", correctIndent: 0, reason: "This should be inside the show_color() function, not at the top level" },
+                    { id: 'd8', text: "color_set(255, 0)", correctIndent: 1, reason: "color_set() needs three values: red, green, blue" },
                     { id: 'd9', text: "red.value(255)", correctIndent: 1, reason: "RGB LED uses PWM — use color_set() or duty_u16(), not value()" },
                     { id: 'd10', text: "def led_chase()", correctIndent: 0, reason: "Function definitions need a colon at the end" },
                 ],
