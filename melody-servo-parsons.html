@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Melody & Servo Practice</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(to bottom, #faf5ff, #f3e8ff);
+            min-height: 100vh;
+            padding: 1rem;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+        }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .progress {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .open-external {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            background: white;
+            border: 1px solid #cbd5e1;
+            border-radius: 0.5rem;
+            color: #475569;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .open-external:hover {
+            background: #f8fafc;
+            border-color: #94a3b8;
+            color: #1e293b;
+        }
+
+        .progress-btn {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 0.875rem;
+            border: 2px solid #cbd5e1;
+            background: white;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .progress-btn.active {
+            background: #9333ea;
+            color: white;
+            border-color: #9333ea;
+            transform: scale(1.1);
+        }
+
+        .progress-btn.completed {
+            background: #22c55e;
+            color: white;
+            border-color: #22c55e;
+        }
+
+        .problem-card {
+            background: white;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+            padding: 1rem;
+        }
+
+        .problem-header {
+            background: linear-gradient(to right, #f3e8ff, #fae8ff);
+            border: 1px solid #e9d5ff;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .problem-header h2 {
+            color: #1e293b;
+            font-size: 1.125rem;
+            margin-bottom: 0.375rem;
+        }
+
+        .problem-header p {
+            color: #475569;
+            font-size: 0.9375rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .circuit-hint {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.6);
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-size: 0.8125rem;
+            color: #64748b;
+        }
+
+        .circuit-hint svg {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* Static code section */
+        .static-code-section {
+            margin-bottom: 1rem;
+        }
+
+        .static-code-section h4 {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .static-code {
+            background: #1e293b;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.8125rem;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+
+        .static-code pre {
+            margin: 0;
+            padding: 0;
+        }
+
+        .static-code code {
+            color: #e2e8f0;
+        }
+
+        .static-code .keyword { color: #c084fc; }
+        .static-code .function { color: #60a5fa; }
+        .static-code .number { color: #4ade80; }
+        .static-code .comment { color: #64748b; }
+        .static-code .string { color: #fbbf24; }
+
+        .columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .columns {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .column h3 {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 0.5rem;
+        }
+
+        .column h3 span {
+            font-weight: normal;
+            color: #94a3b8;
+        }
+
+        .block-area {
+            min-height: 140px;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            border: 2px dashed;
+        }
+
+        .available-area {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+        }
+
+        .solution-area {
+            background: #faf5ff;
+            border-color: #e9d5ff;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 1.5rem;
+            color: #94a3b8;
+            font-size: 0.875rem;
+        }
+
+        .solution-area .empty-message {
+            color: #c084fc;
+        }
+
+        .code-block {
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.375rem 0.625rem;
+            margin-bottom: 0.375rem;
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 0.375rem;
+            cursor: grab;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.8125rem;
+            transition: all 0.2s;
+        }
+
+        .code-block:hover {
+            border-color: #a855f7;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .code-block.dragging {
+            opacity: 0.5;
+            transform: scale(0.95);
+        }
+
+        .code-block.distractor-hint {
+            background: #fef2f2;
+            border-color: #fca5a5;
+            color: #991b1b;
+        }
+
+        .code-block .grip {
+            color: #94a3b8;
+            flex-shrink: 0;
+        }
+
+        .code-block code {
+            flex: 1;
+        }
+
+        .indent-1 { margin-left: 1.25rem; }
+        .indent-2 { margin-left: 2.5rem; }
+        .indent-3 { margin-left: 3.75rem; }
+
+        .move-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+            margin-right: 0.25rem;
+        }
+
+        .move-btn {
+            width: 1.25rem;
+            height: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: #64748b;
+            border-radius: 0.2rem;
+            cursor: pointer;
+            font-size: 0.625rem;
+            transition: all 0.15s;
+            padding: 0;
+        }
+
+        .move-btn:hover {
+            background: #e2e8f0;
+            border-color: #94a3b8;
+            color: #334155;
+        }
+
+        .move-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .indent-controls {
+            display: flex;
+            gap: 0.125rem;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .indent-btn {
+            width: 1.375rem;
+            height: 1.375rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #cbd5e1;
+            background: #f8fafc;
+            color: #64748b;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: bold;
+            transition: all 0.15s;
+            padding: 0;
+        }
+
+        .indent-btn:hover {
+            background: #e2e8f0;
+            border-color: #94a3b8;
+            color: #334155;
+        }
+
+        .indent-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .indent-btn:disabled:hover {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            color: #64748b;
+        }
+
+        .trash-zone {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.625rem;
+            margin-top: 0.5rem;
+            border: 2px dashed #cbd5e1;
+            border-radius: 0.375rem;
+            background: #f8fafc;
+            color: #64748b;
+            font-size: 0.8125rem;
+            transition: all 0.2s;
+        }
+
+        .trash-zone.drag-over {
+            background: #fef2f2;
+            border-color: #f87171;
+            color: #b91c1c;
+        }
+
+        .discarded-section {
+            margin-top: 0.5rem;
+        }
+
+        .discarded-section h4 {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            margin-bottom: 0.375rem;
+        }
+
+        .discarded-section .code-block {
+            opacity: 0.6;
+        }
+
+        .feedback {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+        }
+
+        .feedback.success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+
+        .feedback.error {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            color: #92400e;
+        }
+
+        .feedback svg {
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #9333ea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #7e22ce;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-secondary:hover {
+            background: #cbd5e1;
+        }
+
+        .btn-hint {
+            background: #f3e8ff;
+            color: #7e22ce;
+        }
+
+        .btn-hint:hover {
+            background: #e9d5ff;
+        }
+
+        .btn-success {
+            background: #22c55e;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #16a34a;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .completion-screen {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .completion-screen .emoji {
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .completion-screen h2 {
+            font-size: 1.25rem;
+            color: #1e293b;
+            margin-bottom: 0.375rem;
+        }
+
+        .completion-screen p {
+            color: #64748b;
+            margin-bottom: 1rem;
+        }
+
+        /* Code output modal */
+        .code-output {
+            margin-top: 1rem;
+            background: #1e293b;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .code-output-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            background: #334155;
+        }
+
+        .code-output-header span {
+            color: #94a3b8;
+            font-size: 0.8125rem;
+            font-weight: 500;
+        }
+
+        .copy-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.375rem;
+            padding: 0.25rem 0.625rem;
+            background: #475569;
+            color: #e2e8f0;
+            border: none;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #64748b;
+        }
+
+        .copy-btn.copied {
+            background: #22c55e;
+            color: white;
+        }
+
+        .code-output pre {
+            padding: 0.75rem;
+            margin: 0;
+            color: #e2e8f0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 0.8125rem;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+
+        .code-output code {
+            color: #e2e8f0;
+        }
+
+        .code-output .keyword { color: #c084fc; }
+        .code-output .function { color: #60a5fa; }
+        .code-output .number { color: #4ade80; }
+        .code-output .comment { color: #64748b; }
+        .code-output .string { color: #fbbf24; }
+
+        footer {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="top-bar">
+            <div class="progress" id="progress"></div>
+            <a href="" class="open-external" id="openExternal" target="_blank">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>
+                </svg>
+                Open in New Window
+            </a>
+        </div>
+
+        <div class="problem-card" id="problemCard">
+            <!-- Problem content injected here -->
+        </div>
+
+        <div class="problem-card hidden" id="completionScreen">
+            <div class="completion-screen">
+                <div class="emoji">🎵</div>
+                <h2>All Problems Complete!</h2>
+                <p>You're ready to create your octave-indicating melody machine!</p>
+                <button class="btn btn-primary" onclick="startOver()">Start Over</button>
+            </div>
+        </div>
+
+        <footer>
+            Drag blocks or use ▲▼ to reorder • Use ◀▶ to set indentation • Discard distractors in the trash
+        </footer>
+    </div>
+
+    <script>
+        // Problem definitions
+        const problems = [
+            {
+                id: 1,
+                title: "Melody with High/Low Detection",
+                description: "Loop through the melody and play each note. For each note, also print whether it's a 'High note' (octave 4, frequency >= 262 Hz) or 'Low note' (octave 3).",
+                circuitHint: "Passive buzzer circuit with transistor on GP15.",
+                staticCode: `from machine import Pin, PWM
+from time import sleep_ms
+
+buzzer = PWM(Pin(15))
+
+def tone(pin, frequency, duration):
+    pin.freq(frequency)
+    pin.duty_u16(30000)
+    sleep_ms(duration)
+    pin.duty_u16(0)
+
+# Note frequencies
+NOTE_G3 = 196
+NOTE_A3 = 220
+NOTE_B3 = 247
+NOTE_C4 = 262
+NOTE_D4 = 294
+NOTE_E4 = 330
+
+melody = [NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, NOTE_B3, NOTE_C4]`,
+                staticCodeHighlighted: `<span class="keyword">from</span> machine <span class="keyword">import</span> Pin, PWM
+<span class="keyword">from</span> time <span class="keyword">import</span> sleep_ms
+
+buzzer = <span class="function">PWM</span>(<span class="function">Pin</span>(<span class="number">15</span>))
+
+<span class="keyword">def</span> <span class="function">tone</span>(pin, frequency, duration):
+    pin.<span class="function">freq</span>(frequency)
+    pin.<span class="function">duty_u16</span>(<span class="number">30000</span>)
+    <span class="function">sleep_ms</span>(duration)
+    pin.<span class="function">duty_u16</span>(<span class="number">0</span>)
+
+<span class="comment"># Note frequencies</span>
+NOTE_G3 = <span class="number">196</span>
+NOTE_A3 = <span class="number">220</span>
+NOTE_B3 = <span class="number">247</span>
+NOTE_C4 = <span class="number">262</span>
+NOTE_D4 = <span class="number">294</span>
+NOTE_E4 = <span class="number">330</span>
+
+melody = [NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, NOTE_B3, NOTE_C4]`,
+                codeBlocks: [
+                    { id: 'a1', text: "for note in melody:", correctIndent: 0 },
+                    { id: 'a2', text: "tone(buzzer, note, 250)", correctIndent: 1 },
+                    { id: 'a3', text: "if note >= 262:", correctIndent: 1 },
+                    { id: 'a4', text: 'print("High note")', correctIndent: 2 },
+                    { id: 'a5', text: "else:", correctIndent: 1 },
+                    { id: 'a6', text: 'print("Low note")', correctIndent: 2 },
+                    { id: 'a7', text: "sleep_ms(150)", correctIndent: 1 },
+                ],
+                distractors: [
+                    { id: 'd1', text: "for note in range(melody):", correctIndent: 0, reason: "melody is already a list — use 'for note in melody:', not range()" },
+                    { id: 'd2', text: "if note >= 262", correctIndent: 1, reason: "if statements need a colon at the end" },
+                    { id: 'd3', text: "tone(buzzer, 250)", correctIndent: 1, reason: "tone() needs three arguments: pin, frequency, duration — you're missing the note frequency" },
+                ]
+            },
+            {
+                id: 2,
+                title: "Servo Position with User Input",
+                description: "Ask the user for a direction ('L' for left, 'R' for right). Move the servo to 0° for left, 180° for right, or 90° for any other input.",
+                circuitHint: "Servo: signal wire to GP15, red to VBUS (5V), brown to GND.",
+                staticCode: `from machine import Pin, PWM
+from time import sleep
+
+servo = PWM(Pin(15))
+servo.freq(50)
+
+def interval_mapping(x, in_min, in_max, out_min, out_max):
+    return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+
+def servo_write(pin, angle):
+    pulse_width = interval_mapping(angle, 0, 180, 0.5, 2.5)
+    duty = int(interval_mapping(pulse_width, 0, 20, 0, 65535))
+    pin.duty_u16(duty)`,
+                staticCodeHighlighted: `<span class="keyword">from</span> machine <span class="keyword">import</span> Pin, PWM
+<span class="keyword">from</span> time <span class="keyword">import</span> sleep
+
+servo = <span class="function">PWM</span>(<span class="function">Pin</span>(<span class="number">15</span>))
+servo.<span class="function">freq</span>(<span class="number">50</span>)
+
+<span class="keyword">def</span> <span class="function">interval_mapping</span>(x, in_min, in_max, out_min, out_max):
+    <span class="keyword">return</span> (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min
+
+<span class="keyword">def</span> <span class="function">servo_write</span>(pin, angle):
+    pulse_width = <span class="function">interval_mapping</span>(angle, <span class="number">0</span>, <span class="number">180</span>, <span class="number">0.5</span>, <span class="number">2.5</span>)
+    duty = <span class="function">int</span>(<span class="function">interval_mapping</span>(pulse_width, <span class="number">0</span>, <span class="number">20</span>, <span class="number">0</span>, <span class="number">65535</span>))
+    pin.<span class="function">duty_u16</span>(duty)`,
+                codeBlocks: [
+                    { id: 'b1', text: 'direction = input("Enter L or R: ")', correctIndent: 0 },
+                    { id: 'b2', text: 'if direction == "L":', correctIndent: 0 },
+                    { id: 'b3', text: "servo_write(servo, 0)", correctIndent: 1 },
+                    { id: 'b4', text: 'elif direction == "R":', correctIndent: 0 },
+                    { id: 'b5', text: "servo_write(servo, 180)", correctIndent: 1 },
+                    { id: 'b6', text: "else:", correctIndent: 0 },
+                    { id: 'b7', text: "servo_write(servo, 90)", correctIndent: 1 },
+                ],
+                distractors: [
+                    { id: 'd4', text: 'if direction = "L":', correctIndent: 0, reason: "Use == for comparison, single = is for assignment" },
+                    { id: 'd5', text: "for angle in range(180):", correctIndent: 0, reason: "No for loop needed — we're setting a specific angle based on input, not sweeping" },
+                    { id: 'd6', text: "servo_write(0)", correctIndent: 1, reason: "servo_write() needs two arguments: the pin and the angle" },
+                ]
+            },
+            {
+                id: 3,
+                title: "LED Octave Indicator",
+                description: "Loop through the melody and play each note. Light the green LED for octave 3 notes (below 262 Hz) or the blue LED for octave 4 notes (262 Hz and above).",
+                circuitHint: "Buzzer circuit on GP15. Green LED on GP16, Blue LED on GP17.",
+                staticCode: `from machine import Pin, PWM
+from time import sleep_ms
+
+buzzer = PWM(Pin(15))
+green = Pin(16, Pin.OUT)
+blue = Pin(17, Pin.OUT)
+
+def tone(pin, frequency, duration):
+    pin.freq(frequency)
+    pin.duty_u16(30000)
+    sleep_ms(duration)
+    pin.duty_u16(0)
+
+# Note frequencies
+NOTE_G3 = 196
+NOTE_A3 = 220
+NOTE_B3 = 247
+NOTE_C4 = 262
+NOTE_D4 = 294
+NOTE_E4 = 330
+
+melody = [NOTE_E4, NOTE_D4, NOTE_C4, NOTE_D4, NOTE_E4, NOTE_E4, NOTE_E4]`,
+                staticCodeHighlighted: `<span class="keyword">from</span> machine <span class="keyword">import</span> Pin, PWM
+<span class="keyword">from</span> time <span class="keyword">import</span> sleep_ms
+
+buzzer = <span class="function">PWM</span>(<span class="function">Pin</span>(<span class="number">15</span>))
+green = <span class="function">Pin</span>(<span class="number">16</span>, Pin.OUT)
+blue = <span class="function">Pin</span>(<span class="number">17</span>, Pin.OUT)
+
+<span class="keyword">def</span> <span class="function">tone</span>(pin, frequency, duration):
+    pin.<span class="function">freq</span>(frequency)
+    pin.<span class="function">duty_u16</span>(<span class="number">30000</span>)
+    <span class="function">sleep_ms</span>(duration)
+    pin.<span class="function">duty_u16</span>(<span class="number">0</span>)
+
+<span class="comment"># Note frequencies</span>
+NOTE_G3 = <span class="number">196</span>
+NOTE_A3 = <span class="number">220</span>
+NOTE_B3 = <span class="number">247</span>
+NOTE_C4 = <span class="number">262</span>
+NOTE_D4 = <span class="number">294</span>
+NOTE_E4 = <span class="number">330</span>
+
+melody = [NOTE_E4, NOTE_D4, NOTE_C4, NOTE_D4, NOTE_E4, NOTE_E4, NOTE_E4]`,
+                codeBlocks: [
+                    { id: 'c1', text: "for note in melody:", correctIndent: 0 },
+                    { id: 'c2', text: "if note < 262:", correctIndent: 1 },
+                    { id: 'c3', text: "green.value(1)", correctIndent: 2 },
+                    { id: 'c4', text: "blue.value(0)", correctIndent: 2 },
+                    { id: 'c5', text: "else:", correctIndent: 1 },
+                    { id: 'c6', text: "green.value(0)", correctIndent: 2 },
+                    { id: 'c7', text: "blue.value(1)", correctIndent: 2 },
+                    { id: 'c8', text: "tone(buzzer, note, 250)", correctIndent: 1 },
+                    { id: 'c9', text: "sleep_ms(100)", correctIndent: 1 },
+                ],
+                distractors: [
+                    { id: 'd7', text: "if note > 262:", correctIndent: 1, reason: "Octave 3 is BELOW 262 Hz — use < to check for low notes, not >" },
+                    { id: 'd8', text: "green.on()", correctIndent: 2, reason: "Pins don't have an on() method — use green.value(1) to turn it on" },
+                    { id: 'd9', text: "tone(buzzer, melody, 250)", correctIndent: 1, reason: "Pass the individual 'note', not the whole 'melody' list" },
+                ]
+            }
+        ];
+
+        // State
+        let currentProblem = 0;
+        let completed = [];
+        let availableBlocks = [];
+        let solutionBlocks = [];
+        let discardedBlocks = [];
+        let draggedBlock = null;
+        let attempts = 0;
+        let showHint = false;
+
+        // Utility functions
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function isDistractor(block) {
+            return problems[currentProblem].distractors.some(d => d.id === block.id);
+        }
+
+        function getDistractorReason(block) {
+            const distractor = problems[currentProblem].distractors.find(d => d.id === block.id);
+            return distractor ? distractor.reason : '';
+        }
+
+        // Icons as SVG strings
+        const icons = {
+            grip: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="5" r="1"/><circle cx="9" cy="12" r="1"/><circle cx="9" cy="19" r="1"/><circle cx="15" cy="5" r="1"/><circle cx="15" cy="12" r="1"/><circle cx="15" cy="19" r="1"/></svg>',
+            trash: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>',
+            check: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><path d="M22 4L12 14.01l-3-3"/></svg>',
+            checkSmall: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>',
+            copy: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>',
+            x: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>',
+            lightbulb: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9333ea" stroke-width="2"><path d="M9 18h6M10 22h4M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0018 8 6 6 0 006 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 018.91 14"/></svg>',
+            rotate: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 005.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 013.51 15"/></svg>',
+            chevron: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>',
+            indentLeft: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>',
+            indentRight: '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>'
+        };
+
+        // Render functions
+        function renderProgress() {
+            const container = document.getElementById('progress');
+            container.innerHTML = problems.map((p, i) => {
+                let classes = 'progress-btn';
+                if (i === currentProblem) classes += ' active';
+                if (completed.includes(i)) classes += ' completed';
+                return `<button class="${classes}" onclick="goToProblem(${i})">${completed.includes(i) ? '✓' : p.id}</button>`;
+            }).join('');
+        }
+
+        function renderCodeBlock(block, area = 'available', solutionIndex = -1) {
+            const problem = problems[currentProblem];
+            const distractorClass = showHint && isDistractor(block) ? 'distractor-hint' : '';
+            
+            if (area === 'solution') {
+                const solBlock = solutionBlocks[solutionIndex];
+                const indent = solBlock ? solBlock.indent : 0;
+                const indentClass = indent > 0 ? `indent-${indent}` : '';
+                const isFirst = solutionIndex === 0;
+                const isLast = solutionIndex === solutionBlocks.length - 1;
+                
+                return `
+                    <div class="code-block ${indentClass} ${distractorClass}" 
+                         draggable="true" 
+                         data-id="${block.id}"
+                         data-index="${solutionIndex}"
+                         data-area="solution">
+                        <div class="move-controls">
+                            <button class="move-btn" onclick="moveBlock(${solutionIndex}, -1)" ${isFirst ? 'disabled' : ''} title="Move up">▲</button>
+                            <button class="move-btn" onclick="moveBlock(${solutionIndex}, 1)" ${isLast ? 'disabled' : ''} title="Move down">▼</button>
+                        </div>
+                        <span class="grip">${icons.grip}</span>
+                        <code>${escapeHtml(block.text)}</code>
+                        <div class="indent-controls">
+                            <button class="indent-btn" onclick="adjustIndent(${solutionIndex}, -1)" ${indent === 0 ? 'disabled' : ''} title="Decrease indent">
+                                ${icons.indentLeft}
+                            </button>
+                            <button class="indent-btn" onclick="adjustIndent(${solutionIndex}, 1)" ${indent >= 3 ? 'disabled' : ''} title="Increase indent">
+                                ${icons.indentRight}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <div class="code-block ${distractorClass}" 
+                         draggable="true" 
+                         data-id="${block.id}"
+                         data-area="${area}">
+                        <span class="grip">${icons.grip}</span>
+                        <code>${escapeHtml(block.text)}</code>
+                    </div>
+                `;
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function adjustIndent(index, delta) {
+            const current = solutionBlocks[index].indent;
+            const newIndent = Math.max(0, Math.min(3, current + delta));
+            solutionBlocks[index].indent = newIndent;
+            clearFeedback();
+            renderProblem();
+        }
+
+        function moveBlock(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= solutionBlocks.length) return;
+            
+            // Swap the blocks
+            const temp = solutionBlocks[index];
+            solutionBlocks[index] = solutionBlocks[newIndex];
+            solutionBlocks[newIndex] = temp;
+            
+            clearFeedback();
+            renderProblem();
+        }
+
+        function renderProblem() {
+            const problem = problems[currentProblem];
+            const card = document.getElementById('problemCard');
+            
+            card.innerHTML = `
+                <div class="problem-header">
+                    <h2>Problem ${problem.id}: ${problem.title}</h2>
+                    <p>${problem.description}</p>
+                    <div class="circuit-hint">
+                        ${icons.lightbulb}
+                        <span><strong>Circuit:</strong> ${problem.circuitHint}</span>
+                    </div>
+                </div>
+
+                <div class="static-code-section">
+                    <h4>Setup Code (already written for you)</h4>
+                    <div class="static-code">
+                        <pre><code>${problem.staticCodeHighlighted}</code></pre>
+                    </div>
+                </div>
+
+                <div class="columns">
+                    <div class="column">
+                        <h3>Code Blocks <span>(includes ${problem.distractors.length} distractors!)</span></h3>
+                        <div class="block-area available-area" id="availableArea">
+                            ${availableBlocks.length === 0 
+                                ? '<p class="empty-message">All blocks placed</p>'
+                                : availableBlocks.map(b => renderCodeBlock(b, 'available')).join('')
+                            }
+                        </div>
+                        <div class="trash-zone" id="trashZone">
+                            ${icons.trash}
+                            <span>Drag distractors here</span>
+                        </div>
+                        ${discardedBlocks.length > 0 ? `
+                            <div class="discarded-section">
+                                <h4>Discarded:</h4>
+                                ${discardedBlocks.map(b => renderCodeBlock(b, 'discarded')).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="column">
+                        <h3>Your Solution <span>(use ◀ ▶ to indent)</span></h3>
+                        <div class="block-area solution-area" id="solutionArea">
+                            ${solutionBlocks.length === 0 
+                                ? '<p class="empty-message">Drag code blocks here</p>'
+                                : solutionBlocks.map((solBlock, index) => {
+                                    const block = findBlock(solBlock.id);
+                                    return renderCodeBlock(block, 'solution', index);
+                                }).join('')
+                            }
+                        </div>
+                    </div>
+                </div>
+
+                <div id="feedbackArea"></div>
+
+                <div id="codeOutputArea" class="hidden"></div>
+
+                <div class="actions">
+                    <button class="btn btn-primary" onclick="checkSolution()">Check Solution</button>
+                    <button class="btn btn-secondary" onclick="resetProblem()">
+                        ${icons.rotate} Reset
+                    </button>
+                    <button class="btn btn-hint ${attempts < 2 ? 'hidden' : ''}" id="hintBtn" onclick="toggleHint()">
+                        ${showHint ? 'Hide Hint' : 'Show Hint'}
+                    </button>
+                    <button class="btn btn-success hidden" id="nextBtn" onclick="nextProblem()">
+                        Next Problem ${icons.chevron}
+                    </button>
+                </div>
+            `;
+
+            setupDragAndDrop();
+        }
+
+        function showFeedback(correct, message) {
+            const area = document.getElementById('feedbackArea');
+            area.innerHTML = `
+                <div class="feedback ${correct ? 'success' : 'error'}">
+                    ${correct ? icons.check : icons.x}
+                    <span>${message}</span>
+                </div>
+            `;
+
+            if (correct) {
+                document.getElementById('nextBtn').classList.remove('hidden');
+                showCodeOutput();
+            }
+        }
+
+        function generatePlainTextCode() {
+            const problem = problems[currentProblem];
+            const lines = [];
+            
+            // Add header comment
+            lines.push(`# ${problem.title}`);
+            lines.push('');
+            
+            // Add static code
+            lines.push(problem.staticCode);
+            lines.push('');
+            
+            // Add solution blocks with their indentation
+            solutionBlocks.forEach(sb => {
+                const block = findBlock(sb.id);
+                const indent = '    '.repeat(sb.indent);
+                lines.push(indent + block.text);
+            });
+            
+            return lines.join('\n');
+        }
+
+        function highlightSyntax(code) {
+            return code
+                .replace(/\b(from|import|while|True|False|if|else|elif|for|in|def|return|and|or|not)\b/g, '<span class="keyword">$1</span>')
+                .replace(/\b(Pin|PWM|sleep|sleep_ms|value|print|freq|duty_u16|tone|servo_write|interval_mapping|input|int)\b/g, '<span class="function">$1</span>')
+                .replace(/\b(\d+\.?\d*)\b/g, '<span class="number">$1</span>')
+                .replace(/(#.*)/g, '<span class="comment">$1</span>')
+                .replace(/(".*?")/g, '<span class="string">$1</span>');
+        }
+
+        function showCodeOutput() {
+            const area = document.getElementById('codeOutputArea');
+            const plainCode = generatePlainTextCode();
+            const highlightedCode = highlightSyntax(escapeHtml(plainCode));
+            
+            area.classList.remove('hidden');
+            area.innerHTML = `
+                <div class="code-output">
+                    <div class="code-output-header">
+                        <span>📋 Copy this code into Thonny</span>
+                        <button class="copy-btn" onclick="copyCode()">
+                            ${icons.copy} Copy Code
+                        </button>
+                    </div>
+                    <pre><code>${highlightedCode}</code></pre>
+                </div>
+            `;
+        }
+
+        function copyCode() {
+            const plainCode = generatePlainTextCode();
+            
+            navigator.clipboard.writeText(plainCode).then(() => {
+                const btn = document.querySelector('.copy-btn');
+                btn.innerHTML = `${icons.checkSmall} Copied!`;
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.innerHTML = `${icons.copy} Copy Code`;
+                    btn.classList.remove('copied');
+                }, 2000);
+            }).catch(err => {
+                const textarea = document.createElement('textarea');
+                textarea.value = plainCode;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                
+                const btn = document.querySelector('.copy-btn');
+                btn.innerHTML = `${icons.checkSmall} Copied!`;
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.innerHTML = `${icons.copy} Copy Code`;
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+
+        // Drag and drop
+        function setupDragAndDrop() {
+            const blocks = document.querySelectorAll('.code-block');
+            const availableArea = document.getElementById('availableArea');
+            const solutionArea = document.getElementById('solutionArea');
+            const trashZone = document.getElementById('trashZone');
+
+            blocks.forEach(block => {
+                block.addEventListener('dragstart', handleDragStart);
+                block.addEventListener('dragend', handleDragEnd);
+                block.addEventListener('dragover', handleBlockDragOver);
+                block.addEventListener('drop', handleBlockDrop);
+            });
+
+            availableArea.addEventListener('dragover', handleDragOver);
+            availableArea.addEventListener('drop', handleDropOnAvailable);
+
+            solutionArea.addEventListener('dragover', handleDragOver);
+            solutionArea.addEventListener('drop', handleDropOnSolution);
+
+            trashZone.addEventListener('dragover', handleDragOver);
+            trashZone.addEventListener('dragenter', () => trashZone.classList.add('drag-over'));
+            trashZone.addEventListener('dragleave', () => trashZone.classList.remove('drag-over'));
+            trashZone.addEventListener('drop', handleDropOnTrash);
+        }
+
+        function handleDragStart(e) {
+            const id = e.target.dataset.id;
+            draggedBlock = findBlock(id);
+            e.target.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            draggedBlock = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+        }
+
+        function handleBlockDragOver(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function handleBlockDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            if (!draggedBlock) return;
+            
+            const targetEl = e.target.closest('.code-block');
+            const targetArea = targetEl.dataset.area;
+            
+            if (targetArea === 'solution') {
+                const targetIndex = parseInt(targetEl.dataset.index);
+                removeBlockFromAll(draggedBlock.id);
+                solutionBlocks.splice(targetIndex, 0, { id: draggedBlock.id, indent: 0 });
+                clearFeedback();
+                renderProblem();
+            }
+        }
+
+        function handleDropOnAvailable(e) {
+            e.preventDefault();
+            if (!draggedBlock) return;
+            
+            removeBlockFromAll(draggedBlock.id);
+            if (!availableBlocks.find(b => b.id === draggedBlock.id)) {
+                availableBlocks.push(draggedBlock);
+            }
+            clearFeedback();
+            renderProblem();
+        }
+
+        function handleDropOnSolution(e) {
+            e.preventDefault();
+            if (!draggedBlock) return;
+            
+            removeBlockFromAll(draggedBlock.id);
+            solutionBlocks.push({ id: draggedBlock.id, indent: 0 });
+            clearFeedback();
+            renderProblem();
+        }
+
+        function handleDropOnTrash(e) {
+            e.preventDefault();
+            document.getElementById('trashZone').classList.remove('drag-over');
+            if (!draggedBlock) return;
+            
+            removeBlockFromAll(draggedBlock.id);
+            if (!discardedBlocks.find(b => b.id === draggedBlock.id)) {
+                discardedBlocks.push(draggedBlock);
+            }
+            clearFeedback();
+            renderProblem();
+        }
+
+        function findBlock(id) {
+            const problem = problems[currentProblem];
+            return [...problem.codeBlocks, ...problem.distractors].find(b => b.id === id);
+        }
+
+        function removeBlockFromAll(id) {
+            availableBlocks = availableBlocks.filter(b => b.id !== id);
+            solutionBlocks = solutionBlocks.filter(sb => sb.id !== id);
+            discardedBlocks = discardedBlocks.filter(b => b.id !== id);
+        }
+
+        function clearFeedback() {
+            const area = document.getElementById('feedbackArea');
+            if (area) area.innerHTML = '';
+            const codeArea = document.getElementById('codeOutputArea');
+            if (codeArea) {
+                codeArea.classList.add('hidden');
+                codeArea.innerHTML = '';
+            }
+            const nextBtn = document.getElementById('nextBtn');
+            if (nextBtn) nextBtn.classList.add('hidden');
+        }
+
+        // Validation - compare by TEXT, not ID (handles duplicate-text blocks)
+        function checkSolution() {
+            attempts++;
+            const problem = problems[currentProblem];
+            
+            if (attempts >= 2) {
+                document.getElementById('hintBtn').classList.remove('hidden');
+            }
+
+            // Check for distractors
+            const distractorIds = problem.distractors.map(d => d.id);
+            const distractorsInSolution = solutionBlocks.filter(sb => distractorIds.includes(sb.id));
+            
+            if (distractorsInSolution.length > 0) {
+                const distractor = problem.distractors.find(d => d.id === distractorsInSolution[0].id);
+                showFeedback(false, `This line doesn't belong: "${distractor.text}" — ${distractor.reason}`);
+                return;
+            }
+
+            // Check block count
+            if (solutionBlocks.length !== problem.codeBlocks.length) {
+                showFeedback(false, `Your solution has ${solutionBlocks.length} lines, but the correct solution needs ${problem.codeBlocks.length} lines.`);
+                return;
+            }
+
+            // Compare by TEXT, not IDs (handles identical-text blocks)
+            const expectedTexts = problem.codeBlocks.map(cb => cb.text);
+            const solutionTexts = solutionBlocks.map(sb => {
+                const block = findBlock(sb.id);
+                return block.text;
+            });
+            
+            let orderCorrect = true;
+            for (let i = 0; i < expectedTexts.length; i++) {
+                if (solutionTexts[i] !== expectedTexts[i]) {
+                    orderCorrect = false;
+                    break;
+                }
+            }
+
+            if (!orderCorrect) {
+                showFeedback(false, "The blocks are in the wrong order. Think about the structure: loop first, then what happens for each item.");
+                return;
+            }
+
+            // Check indentation by position
+            const indentErrors = [];
+            solutionBlocks.forEach((sb, index) => {
+                const expectedBlock = problem.codeBlocks[index];
+                if (sb.indent !== expectedBlock.correctIndent) {
+                    const block = findBlock(sb.id);
+                    indentErrors.push({
+                        text: block.text,
+                        got: sb.indent,
+                        expected: expectedBlock.correctIndent
+                    });
+                }
+            });
+
+            if (indentErrors.length > 0) {
+                const err = indentErrors[0];
+                const direction = err.got < err.expected ? "needs more indentation" : "has too much indentation";
+                showFeedback(false, `Indentation error: "${err.text}" ${direction}. Code inside loops and if/else must be indented.`);
+                return;
+            }
+
+            showFeedback(true, "Excellent! Your code is correct — including the indentation!");
+        }
+
+        function resetProblem() {
+            const problem = problems[currentProblem];
+            availableBlocks = shuffleArray([...problem.codeBlocks, ...problem.distractors]);
+            solutionBlocks = [];
+            discardedBlocks = [];
+            attempts = 0;
+            showHint = false;
+            renderProblem();
+        }
+
+        function toggleHint() {
+            showHint = !showHint;
+            renderProblem();
+        }
+
+        function nextProblem() {
+            if (!completed.includes(currentProblem)) {
+                completed.push(currentProblem);
+            }
+            
+            if (currentProblem < problems.length - 1) {
+                currentProblem++;
+                initProblem();
+            } else {
+                document.getElementById('problemCard').classList.add('hidden');
+                document.getElementById('completionScreen').classList.remove('hidden');
+                renderProgress();
+            }
+        }
+
+        function goToProblem(index) {
+            currentProblem = index;
+            initProblem();
+            document.getElementById('problemCard').classList.remove('hidden');
+            document.getElementById('completionScreen').classList.add('hidden');
+        }
+
+        function startOver() {
+            currentProblem = 0;
+            completed = [];
+            initProblem();
+            document.getElementById('problemCard').classList.remove('hidden');
+            document.getElementById('completionScreen').classList.add('hidden');
+        }
+
+        function initProblem() {
+            const problem = problems[currentProblem];
+            availableBlocks = shuffleArray([...problem.codeBlocks, ...problem.distractors]);
+            solutionBlocks = [];
+            discardedBlocks = [];
+            attempts = 0;
+            showHint = false;
+            renderProgress();
+            renderProblem();
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('openExternal').href = window.location.href;
+            initProblem();
+        });
+    </script>
+</body>
+</html>
