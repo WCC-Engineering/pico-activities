@@ -645,7 +645,7 @@ switch = <span class="function">Pin</span>(<span class="number">14</span>, Pin.I
                     { id: 'b13', text: "show_right()", correctIndent: 2 },
                 ],
                 distractors: [
-                    { id: 'd4', text: "def show_left():", correctIndent: 1, reason: "Function definitions go at indent level 0 — they're defined outside the main loop" },
+                    { id: 'd4', text: "function show_left()", correctIndent: 0, reason: "Python uses 'def' to define functions, not 'function' — that's JavaScript syntax" },
                     { id: 'd5', text: "show_left", correctIndent: 2, reason: "To call a function, you need parentheses: show_left()" },
                     { id: 'd6', text: "def show_left()", correctIndent: 0, reason: "Function definitions need a colon at the end: def show_left():" },
                 ]
