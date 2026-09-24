@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pico LED Programming Practice</title>
+    <title>Pico LED Programming Practice (v2)</title>
     <style>
         * {
             box-sizing: border-box;
@@ -1114,6 +1114,11 @@
                 const config = problem.swappablePhases;
                 const whileIdx = config.whileIndex;
                 
+                console.log("=== swappablePhases validation ===");
+                console.log("solutionTexts:", solutionTexts);
+                console.log("expectedTexts:", expectedTexts);
+                console.log("whileIdx:", whileIdx);
+                
                 // Helper: check if two arrays contain same elements (as sets)
                 const sameSet = (arr1, arr2) => {
                     if (arr1.length !== arr2.length) return false;
@@ -1167,21 +1172,33 @@
                     const solPhase1 = loopBody.slice(0, phaseLen);
                     const solPhase2 = loopBody.slice(phaseLen);
                     
+                    console.log("loopBody:", loopBody);
+                    console.log("phaseATexts:", phaseATexts);
+                    console.log("phaseBTexts:", phaseBTexts);
+                    console.log("solPhase1:", solPhase1);
+                    console.log("solPhase2:", solPhase2);
+                    
                     // Check if phases match (with swappable pairs)
                     // Phase A has first two swappable, Phase B has first two swappable
                     const matchesPhaseA = (solPhase) => {
                         // First two can swap, third must be sleep
-                        return sameSet(solPhase.slice(0, 2), phaseATexts.slice(0, 2)) &&
-                               solPhase[2] === phaseATexts[2];
+                        const setMatch = sameSet(solPhase.slice(0, 2), phaseATexts.slice(0, 2));
+                        const sleepMatch = solPhase[2] === phaseATexts[2];
+                        console.log("matchesPhaseA:", solPhase, "setMatch:", setMatch, "sleepMatch:", sleepMatch);
+                        return setMatch && sleepMatch;
                     };
                     const matchesPhaseB = (solPhase) => {
-                        return sameSet(solPhase.slice(0, 2), phaseBTexts.slice(0, 2)) &&
-                               solPhase[2] === phaseBTexts[2];
+                        const setMatch = sameSet(solPhase.slice(0, 2), phaseBTexts.slice(0, 2));
+                        const sleepMatch = solPhase[2] === phaseBTexts[2];
+                        console.log("matchesPhaseB:", solPhase, "setMatch:", setMatch, "sleepMatch:", sleepMatch);
+                        return setMatch && sleepMatch;
                     };
                     
                     // Valid orderings: A-B or B-A
                     const validAB = matchesPhaseA(solPhase1) && matchesPhaseB(solPhase2);
                     const validBA = matchesPhaseB(solPhase1) && matchesPhaseA(solPhase2);
+                    
+                    console.log("validAB:", validAB, "validBA:", validBA);
                     
                     if (!validAB && !validBA) {
                         orderCorrect = false;
