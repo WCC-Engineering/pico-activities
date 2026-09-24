@@ -609,7 +609,12 @@
                     { id: 'd5', text: "sleep()", correctIndent: 1, reason: "sleep() requires a time argument like sleep(0.5)" },
                     { id: 'd6', text: "LED1.value(1)", correctIndent: 1, reason: "Python is case-sensitive: 'LED1' is not the same as 'led1'" },
                 ],
-                swappableImports: ['b1', 'b2']
+                swappableImports: ['b1', 'b2'],
+                swappablePhases: {
+                    afterIndex: 4,  // After "while True:" (index 4, which is b5)
+                    phaseA: ['b6', 'b7', 'b8'],  // led1 on, led2 off, sleep
+                    phaseB: ['b9', 'b10', 'b11'] // led1 off, led2 on, sleep
+                }
             },
             {
                 id: 3,
@@ -1098,7 +1103,46 @@
                 return block.text;
             });
             
-            if (problem.swappableImports) {
+            if (problem.swappablePhases) {
+                // Handle problems where two phases inside the loop can be swapped
+                const config = problem.swappablePhases;
+                const startIdx = config.afterIndex + 1;  // First block after "while True:"
+                
+                // Check imports (first two) can be swapped
+                if (problem.swappableImports) {
+                    const firstTwoExpected = [expectedTexts[0], expectedTexts[1]].sort();
+                    const firstTwoSolution = [solutionTexts[0], solutionTexts[1]].sort();
+                    if (firstTwoExpected[0] !== firstTwoSolution[0] || firstTwoExpected[1] !== firstTwoSolution[1]) {
+                        orderCorrect = false;
+                    }
+                }
+                
+                // Check setup blocks (between imports and while) match exactly
+                for (let i = 2; i <= config.afterIndex; i++) {
+                    if (solutionTexts[i] !== expectedTexts[i]) {
+                        orderCorrect = false;
+                        break;
+                    }
+                }
+                
+                // Get phase texts
+                const phaseATexts = config.phaseA.map(id => problem.codeBlocks.find(cb => cb.id === id).text);
+                const phaseBTexts = config.phaseB.map(id => problem.codeBlocks.find(cb => cb.id === id).text);
+                
+                // Get what's in the solution's loop body
+                const loopBodyTexts = solutionTexts.slice(startIdx);
+                
+                // Check if it matches A-then-B or B-then-A
+                const expectedAB = [...phaseATexts, ...phaseBTexts];
+                const expectedBA = [...phaseBTexts, ...phaseATexts];
+                
+                const matchesAB = loopBodyTexts.every((t, i) => t === expectedAB[i]);
+                const matchesBA = loopBodyTexts.every((t, i) => t === expectedBA[i]);
+                
+                if (!matchesAB && !matchesBA) {
+                    orderCorrect = false;
+                }
+            } else if (problem.swappableImports) {
                 // First two can be in either order
                 const firstTwoExpected = [expectedTexts[0], expectedTexts[1]].sort();
                 const firstTwoSolution = [solutionTexts[0], solutionTexts[1]].sort();
