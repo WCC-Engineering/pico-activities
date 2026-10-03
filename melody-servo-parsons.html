@@ -249,6 +249,12 @@
             color: #991b1b;
         }
 
+        .code-block.error-highlight {
+            background: #fffbeb;
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
+        }
+
         .code-block .grip {
             color: #94a3b8;
             flex-shrink: 0;
@@ -641,10 +647,13 @@ melody = [NOTE_C4, NOTE_G3, NOTE_G3, NOTE_A3, NOTE_G3, NOTE_B3, NOTE_C4]`,
                     { id: 'a7', text: "sleep_ms(150)", correctIndent: 1 },
                 ],
                 distractors: [
-                    { id: 'd1', text: "for note in range(melody):", correctIndent: 0, reason: "melody is already a list — use 'for note in melody:', not range()" },
-                    { id: 'd2', text: "if note >= 262", correctIndent: 1, reason: "if statements need a colon at the end" },
-                    { id: 'd3', text: "tone(buzzer, 250)", correctIndent: 1, reason: "tone() needs three arguments: pin, frequency, duration — you're missing the note frequency" },
-                ]
+                    { id: 'd1', text: "for note in range(melody):", correctIndent: 0, reason: "melody is already a list, so loop over it directly: for note in melody:" },
+                    { id: 'd2', text: "if note >= 262", correctIndent: 1, reason: "if statements need a colon at the end." },
+                    { id: 'd3', text: "tone(buzzer, 250)", correctIndent: 1, reason: "tone() needs three arguments: pin, frequency, and duration. This is missing the note frequency." },
+                ],
+                // Behavior checking (see "Solution checking by SIMULATION" below)
+                outputs: [{ pins: [15], label: 'the buzzer', kind: 'buzzer' }],
+                scenarios: [{ desc: '' }]
             },
             {
                 id: 2,
@@ -687,9 +696,15 @@ servo.<span class="function">freq</span>(<span class="number">50</span>)
                     { id: 'b7', text: "servo_write(servo, 90)", correctIndent: 1 },
                 ],
                 distractors: [
-                    { id: 'd4', text: 'if direction = "L":', correctIndent: 0, reason: "Use == for comparison, single = is for assignment" },
-                    { id: 'd5', text: "for angle in range(180):", correctIndent: 0, reason: "No for loop needed — we're setting a specific angle based on input, not sweeping" },
-                    { id: 'd6', text: "servo_write(0)", correctIndent: 1, reason: "servo_write() needs two arguments: the pin and the angle" },
+                    { id: 'd4', text: 'if direction = "L":', correctIndent: 0, reason: "Use == to compare. A single = is for assignment." },
+                    { id: 'd5', text: "for angle in range(180):", correctIndent: 0, reason: "No loop is needed here. The servo goes to one angle based on the input instead of sweeping." },
+                    { id: 'd6', text: "servo_write(0)", correctIndent: 1, reason: "servo_write() needs two arguments: the pin and the angle." },
+                ],
+                outputs: [{ pins: [15], label: 'the servo', kind: 'servo' }],
+                scenarios: [
+                    { inputs: ['L'], desc: 'When the user enters "L"' },
+                    { inputs: ['R'], desc: 'When the user enters "R"' },
+                    { inputs: ['X'], desc: 'When the user enters "X"' }
                 ]
             },
             {
@@ -718,7 +733,7 @@ NOTE_C4 = 262
 NOTE_D4 = 294
 NOTE_E4 = 330
 
-melody = [NOTE_E4, NOTE_D4, NOTE_C4, NOTE_D4, NOTE_E4, NOTE_E4, NOTE_E4]`,
+melody = [NOTE_E4, NOTE_D4, NOTE_C4, NOTE_B3, NOTE_A3, NOTE_G3, NOTE_C4]`,
                 staticCodeHighlighted: `<span class="keyword">from</span> machine <span class="keyword">import</span> Pin, PWM
 <span class="keyword">from</span> time <span class="keyword">import</span> sleep_ms
 
@@ -740,7 +755,7 @@ NOTE_C4 = <span class="number">262</span>
 NOTE_D4 = <span class="number">294</span>
 NOTE_E4 = <span class="number">330</span>
 
-melody = [NOTE_E4, NOTE_D4, NOTE_C4, NOTE_D4, NOTE_E4, NOTE_E4, NOTE_E4]`,
+melody = [NOTE_E4, NOTE_D4, NOTE_C4, NOTE_B3, NOTE_A3, NOTE_G3, NOTE_C4]`,
                 codeBlocks: [
                     { id: 'c1', text: "for note in melody:", correctIndent: 0 },
                     { id: 'c2', text: "if note < 262:", correctIndent: 1 },
@@ -753,10 +768,12 @@ melody = [NOTE_E4, NOTE_D4, NOTE_C4, NOTE_D4, NOTE_E4, NOTE_E4, NOTE_E4]`,
                     { id: 'c9', text: "sleep_ms(100)", correctIndent: 1 },
                 ],
                 distractors: [
-                    { id: 'd7', text: "if note > 262:", correctIndent: 1, reason: "Octave 3 is BELOW 262 Hz — use < to check for low notes, not >" },
-                    { id: 'd8', text: "green.on()", correctIndent: 2, reason: "Pins don't have an on() method — use green.value(1) to turn it on" },
-                    { id: 'd9', text: "tone(buzzer, melody, 250)", correctIndent: 1, reason: "Pass the individual 'note', not the whole 'melody' list" },
-                ]
+                    { id: 'd7', text: "if note > 262:", correctIndent: 1, reason: "Octave 3 notes are BELOW 262 Hz, so use < to check for low notes." },
+                    { id: 'd8', text: "green.value(ON)", correctIndent: 2, reason: "ON isn't defined in Python. Use 1 to turn the LED on: green.value(1)" },
+                    { id: 'd9', text: "tone(buzzer, melody, 250)", correctIndent: 1, reason: "Pass the individual note, not the whole melody list." },
+                ],
+                outputs: [{ pins: [15], label: 'the buzzer', kind: 'buzzer' }, { pins: [16], label: 'the green LED' }, { pins: [17], label: 'the blue LED' }],
+                scenarios: [{ desc: '' }]
             }
         ];
 
@@ -964,8 +981,12 @@ melody = [NOTE_E4, NOTE_D4, NOTE_C4, NOTE_D4, NOTE_E4, NOTE_E4, NOTE_E4]`,
             setupDragAndDrop();
         }
 
-        function showFeedback(correct, message) {
+        function showFeedback(correct, message, highlightIndex) {
             const area = document.getElementById('feedbackArea');
+            if (!correct && highlightIndex !== undefined && highlightIndex !== null) {
+                const el = document.querySelector(`#solutionArea .code-block[data-index="${highlightIndex}"]`);
+                if (el) el.classList.add('error-highlight');
+            }
             area.innerHTML = `
                 <div class="feedback ${correct ? 'success' : 'error'}">
                     ${correct ? icons.check : icons.x}
@@ -1118,11 +1139,25 @@ melody = [NOTE_E4, NOTE_D4, NOTE_C4, NOTE_D4, NOTE_E4, NOTE_E4, NOTE_E4]`,
             const targetArea = targetEl.dataset.area;
             
             if (targetArea === 'solution') {
-                const targetIndex = parseInt(targetEl.dataset.index);
+                const targetId = targetEl.dataset.id;
+                if (targetId === draggedBlock.id) return;
+                // Drop above or below the target depending on which half was hit
+                const rect = targetEl.getBoundingClientRect();
+                const after = e.clientY > rect.top + rect.height / 2;
+                // Keep a block's indent when reordering; new blocks take the target's indent
+                const existing = solutionBlocks.find(sb => sb.id === draggedBlock.id);
+                const targetBlock = solutionBlocks.find(sb => sb.id === targetId);
+                const indent = existing ? existing.indent : targetBlock.indent;
                 removeBlockFromAll(draggedBlock.id);
-                solutionBlocks.splice(targetIndex, 0, { id: draggedBlock.id, indent: 0 });
+                let insertAt = solutionBlocks.findIndex(sb => sb.id === targetId);
+                if (after) insertAt++;
+                solutionBlocks.splice(insertAt, 0, { id: draggedBlock.id, indent });
                 clearFeedback();
                 renderProblem();
+            } else if (targetArea === 'available') {
+                handleDropOnAvailable(e);
+            } else {
+                handleDropOnTrash(e);
             }
         }
 
@@ -1142,8 +1177,9 @@ melody = [NOTE_E4, NOTE_D4, NOTE_C4, NOTE_D4, NOTE_E4, NOTE_E4, NOTE_E4]`,
             e.preventDefault();
             if (!draggedBlock) return;
             
+            const existing = solutionBlocks.find(sb => sb.id === draggedBlock.id);
             removeBlockFromAll(draggedBlock.id);
-            solutionBlocks.push({ id: draggedBlock.id, indent: 0 });
+            solutionBlocks.push({ id: draggedBlock.id, indent: existing ? existing.indent : 0 });
             clearFeedback();
             renderProblem();
         }
@@ -1184,73 +1220,877 @@ melody = [NOTE_E4, NOTE_D4, NOTE_C4, NOTE_D4, NOTE_E4, NOTE_E4, NOTE_E4]`,
             if (nextBtn) nextBtn.classList.add('hidden');
         }
 
-        // Validation - compare by TEXT, not ID (handles duplicate-text blocks)
+        // ================================================================
+        // Solution checking by SIMULATION
+        // ----------------------------------------------------------------
+        // Instead of comparing the student's arrangement to one answer key,
+        // the setup code plus the student's blocks are run through a small
+        // MicroPython interpreter. Any arrangement that is valid Python and
+        // produces the same observable behavior as the reference solution
+        // (the codeBlocks list in order) is accepted.
+        //
+        // Per-problem configuration:
+        //   outputs:   [{ pins: [15], label: 'the LED (GP15)', kind: 'led' }]
+        //              kind is 'led' (default), 'rgb', 'buzzer' or 'servo'
+        //   sensors:   { 14: 'the switch' }   input pins the program reads
+        //   scenarios: test runs. A run with `segments` is for programs that
+        //              loop forever: each segment holds the sensors at fixed
+        //              values for a few simulated seconds and the steady
+        //              behavior is compared. A run without segments is for
+        //              programs that finish; the whole run is compared.
+        //              `inputs` lists what the user types for input().
+        //   invertPins:     sensor pins whose meaning may be swapped (either
+        //                   branch of the if may hold either action)
+        //   acceptReversed: a repeating pattern may run backwards
+        // ================================================================
+        const SIM_TICK = 0.0001;     // simulated seconds per executed line
+        const SIM_VISIBLE = 0.02;    // states shorter than this can't be seen or heard
+        const SIM_HOLD = 6;          // simulated seconds per segment
+        const SIM_FINITE_LIMIT = 120;
+        const SIM_MAX_STEPS = 3000000;
+        const SIM_MAX_DEPTH = 25;
+        const SIM_HEADERS = ['def', 'while', 'for', 'if', 'elif', 'else'];
+
+        class SimError extends Error {
+            constructor(message, index) { super(message); this.index = index; }
+        }
+        class SimStop extends Error {}
+        class SimReturn { constructor(value) { this.value = value; } }
+
+        // ---------- Parsing ----------
+        function simTokenize(src) {
+            const toks = [];
+            let i = 0;
+            while (i < src.length) {
+                if (src[i] === ' ' || src[i] === '\t') { i++; continue; }
+                const rest = src.slice(i);
+                let m;
+                if ((m = rest.match(/^(f?)("([^"\\]|\\.)*"|'([^'\\]|\\.)*')/))) {
+                    toks.push({ t: 'str', f: !!m[1], v: m[2].slice(1, -1) });
+                } else if ((m = rest.match(/^(\d+\.\d*|\.\d+|\d+)/))) {
+                    toks.push({ t: 'num', v: parseFloat(m[1]) });
+                } else if ((m = rest.match(/^[A-Za-z_]\w*/))) {
+                    toks.push({ t: 'name', v: m[0] });
+                } else if ((m = rest.match(/^(\*\*|\/\/|==|!=|<=|>=|[-+*\/%<>()\[\],.:=])/))) {
+                    toks.push({ t: 'op', v: m[1] });
+                } else {
+                    throw new Error('Cannot read: ' + src);
+                }
+                i += m[0].length;
+            }
+            return toks;
+        }
+
+        function simParseExpr(src) {
+            const toks = simTokenize(src);
+            let p = 0;
+            const isOp = v => toks[p] && toks[p].t === 'op' && toks[p].v === v;
+            const isKw = v => toks[p] && toks[p].t === 'name' && toks[p].v === v;
+            const expect = v => { if (!isOp(v)) throw new Error(`Expected ${v} in ${src}`); p++; };
+            const orE = () => { let l = andE(); while (isKw('or')) { p++; l = { k: 'or', l, r: andE() }; } return l; };
+            const andE = () => { let l = notE(); while (isKw('and')) { p++; l = { k: 'and', l, r: notE() }; } return l; };
+            const notE = () => { if (isKw('not')) { p++; return { k: 'not', e: notE() }; } return cmpE(); };
+            const cmpE = () => {
+                const first = addE(); const ops = [], rs = [];
+                while (toks[p] && toks[p].t === 'op' && ['<', '>', '<=', '>=', '==', '!='].includes(toks[p].v)) { ops.push(toks[p++].v); rs.push(addE()); }
+                return ops.length ? { k: 'cmp', first, ops, rs } : first;
+            };
+            const addE = () => { let l = mulE(); while (isOp('+') || isOp('-')) { const op = toks[p++].v; l = { k: 'bin', op, l, r: mulE() }; } return l; };
+            const mulE = () => { let l = unE(); while (isOp('*') || isOp('/') || isOp('//') || isOp('%')) { const op = toks[p++].v; l = { k: 'bin', op, l, r: unE() }; } return l; };
+            const unE = () => { if (isOp('-')) { p++; return { k: 'neg', e: unE() }; } if (isOp('+')) { p++; return unE(); } return powE(); };
+            const powE = () => { const b = postE(); if (isOp('**')) { p++; return { k: 'bin', op: '**', l: b, r: unE() }; } return b; };
+            const postE = () => {
+                let e = atom();
+                for (;;) {
+                    if (isOp('(')) {
+                        p++; const args = [];
+                        while (!isOp(')')) { args.push(orE()); if (isOp(',')) p++; else break; }
+                        expect(')'); e = { k: 'call', f: e, args };
+                    } else if (isOp('.')) {
+                        p++; e = { k: 'attr', o: e, n: toks[p++].v };
+                    } else if (isOp('[')) {
+                        p++; const i = orE(); expect(']'); e = { k: 'index', o: e, i };
+                    } else return e;
+                }
+            };
+            const atom = () => {
+                const t = toks[p++];
+                if (!t) throw new Error('Unexpected end of ' + src);
+                if (t.t === 'num') return { k: 'const', v: t.v };
+                if (t.t === 'str') return t.f ? { k: 'fstr', parts: simParseF(t.v) } : { k: 'const', v: t.v };
+                if (t.t === 'name') {
+                    if (t.v === 'True') return { k: 'const', v: true };
+                    if (t.v === 'False') return { k: 'const', v: false };
+                    if (t.v === 'None') return { k: 'const', v: null };
+                    return { k: 'name', v: t.v };
+                }
+                if (t.v === '(') { const e = orE(); expect(')'); return e; }
+                if (t.v === '[') {
+                    const items = [];
+                    while (!isOp(']')) { items.push(orE()); if (isOp(',')) p++; else break; }
+                    expect(']'); return { k: 'list', items };
+                }
+                throw new Error('Unexpected token in ' + src);
+            };
+            const e = orE();
+            if (p < toks.length) throw new Error('Could not read all of ' + src);
+            return e;
+        }
+
+        function simParseF(s) {
+            const parts = [];
+            let i = 0, lit = '';
+            while (i < s.length) {
+                if (s[i] === '{') {
+                    if (lit) parts.push({ lit });
+                    lit = '';
+                    const j = s.indexOf('}', i);
+                    const inner = s.slice(i + 1, j);
+                    const c = inner.indexOf(':');
+                    parts.push({ e: simParseExpr(c < 0 ? inner : inner.slice(0, c)), spec: c < 0 ? '' : inner.slice(c + 1) });
+                    i = j + 1;
+                } else lit += s[i++];
+            }
+            if (lit) parts.push({ lit });
+            return parts;
+        }
+
+        function simParseStmt(text) {
+            let m;
+            if ((m = text.match(/^from (\w+) import (.+)$/))) return { kind: 'from', mod: m[1], names: m[2].split(',').map(s => s.trim()) };
+            if ((m = text.match(/^import (\w+)$/))) return { kind: 'import', mod: m[1] };
+            if ((m = text.match(/^def (\w+)\((.*)\):$/))) return { kind: 'def', name: m[1], params: m[2].trim() ? m[2].split(',').map(s => s.trim()) : [] };
+            if ((m = text.match(/^while (.+):$/))) return { kind: 'while', cond: simParseExpr(m[1]) };
+            if ((m = text.match(/^for (\w+) in (.+):$/))) return { kind: 'for', target: m[1], iter: simParseExpr(m[2]) };
+            if ((m = text.match(/^if (.+):$/))) return { kind: 'if', cond: simParseExpr(m[1]), branches: [] };
+            if ((m = text.match(/^elif (.+):$/))) return { kind: 'elif', cond: simParseExpr(m[1]) };
+            if (text === 'else:') return { kind: 'else' };
+            if ((m = text.match(/^return(?:\s+(.+))?$/))) return { kind: 'return', e: m[1] ? simParseExpr(m[1]) : null };
+            if (text === 'pass') return { kind: 'pass' };
+            if ((m = text.match(/^([A-Za-z_]\w*)\s*=(?!=)\s*(.+)$/))) return { kind: 'assign', name: m[1], e: simParseExpr(m[2]) };
+            return { kind: 'expr', e: simParseExpr(text) };
+        }
+
+        // Python source text (the setup code) -> [{ text, indent, index: null }]
+        function simSourceLines(src) {
+            const out = [];
+            for (const raw of (src || '').split('\n')) {
+                let line = '', q = null;
+                for (const ch of raw) {               // strip comments outside strings
+                    if (q) { if (ch === q) q = null; }
+                    else if (ch === '"' || ch === "'") q = ch;
+                    else if (ch === '#') break;
+                    line += ch;
+                }
+                if (!line.trim()) continue;
+                out.push({ text: line.trim(), indent: Math.round((line.length - line.trimStart().length) / 4), index: null });
+            }
+            return out;
+        }
+
+        // Flat (text, indent) lines -> block tree, reporting the structural
+        // problems Python itself would report.
+        function simBuildTree(lines) {
+            const root = { kind: 'root', indent: -1, children: [] };
+            const stack = [root];
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const node = { ...line, ...simParseStmt(line.text), children: [] };
+                const prev = i > 0 ? lines[i - 1] : null;
+                const prevIsHeader = prev && SIM_HEADERS.includes(simParseStmt(prev.text).kind);
+
+                if (prevIsHeader) {
+                    if (line.indent !== prev.indent + 1) {
+                        throw new SimError(`"${prev.text}" ends with a colon, so the line right below it must be indented one step further than it is.`, prev.index);
+                    }
+                } else if (i === 0 ? line.indent !== 0 : line.indent > prev.indent) {
+                    throw new SimError(`"${line.text}" is indented further than Python allows here. A line can only be indented one more step when the line above it ends with a colon.`, line.index);
+                }
+
+                while (stack[stack.length - 1].indent >= line.indent) stack.pop();
+                const parent = stack[stack.length - 1];
+
+                if (node.kind === 'elif' || node.kind === 'else') {
+                    const sib = parent.children[parent.children.length - 1];
+                    if (!sib || sib.kind !== 'if' || sib.closed) {
+                        throw new SimError(`"${line.text}" must line up exactly under an "if" (or "elif") line at the same indentation, with only that line's indented code in between.`, line.index);
+                    }
+                    sib.branches.push(node);
+                    if (node.kind === 'else') sib.closed = true;
+                } else {
+                    parent.children.push(node);
+                }
+                if (node.kind === 'return' && !stack.some(s => s.kind === 'def')) {
+                    throw new SimError(`"${line.text}" is not inside a function. return can only be used in a function's indented code.`, line.index);
+                }
+                stack.push(node);
+            }
+            const last = lines[lines.length - 1];
+            if (last && SIM_HEADERS.includes(simParseStmt(last.text).kind)) {
+                throw new SimError(`"${last.text}" ends with a colon, so it needs at least one indented line below it.`, last.index);
+            }
+            // Names each function assigns are local to it (Python's rule)
+            const collect = (nodes, set) => {
+                for (const n of nodes) {
+                    if (n.kind === 'assign') set.add(n.name);
+                    if (n.kind === 'for') set.add(n.target);
+                    if (n.kind === 'def') { set.add(n.name); continue; }
+                    collect(n.children, set);
+                    if (n.branches) n.branches.forEach(b => collect(b.children, set));
+                }
+            };
+            const visit = nodes => {
+                for (const n of nodes) {
+                    if (n.kind === 'def') { n.localNames = new Set(n.params); collect(n.children, n.localNames); }
+                    visit(n.children);
+                    if (n.branches) n.branches.forEach(b => visit(b.children));
+                }
+            };
+            visit(root.children);
+            return root;
+        }
+
+        // ---------- Values ----------
+        function simStr(v) {
+            if (v === true) return 'True';
+            if (v === false) return 'False';
+            if (v === null || v === undefined) return 'None';
+            if (Array.isArray(v)) return '[' + v.map(x => typeof x === 'string' ? `'${x}'` : simStr(x)).join(', ') + ']';
+            if (typeof v === 'number' || typeof v === 'string') return String(v);
+            return '<object>';
+        }
+        function simFormat(v, spec) {
+            let m;
+            if ((m = spec.match(/^\.(\d+)f$/))) return Number(v).toFixed(+m[1]);
+            if (spec === 'd') return String(Math.trunc(v));
+            return simStr(v);
+        }
+        const simTruthy = v => !(v === false || v === null || v === undefined || v === 0 || v === '' || (Array.isArray(v) && !v.length));
+
+        // ---------- Running a program ----------
+        // trees: [setup tree, student tree]. Returns a record of everything observable.
+        function simRun(trees, problem, scenario, studentLines, invertPins) {
+            const segs = scenario.segments || null;
+            const nseg = segs ? segs.length : 1;
+            const end = segs ? nseg * SIM_HOLD : SIM_FINITE_LIMIT;
+            const state = {};
+            for (const o of problem.outputs || []) for (const pin of o.pins) state[pin] = 0;
+            const pwm = {};
+            const changes = [{ t: 0, s: { ...state } }];
+            const prints = [];
+            const passes = [];
+            const reads = {};
+            const notes = new Set();
+            const globals = {};
+            let t = 0, steps = 0, inputsUsed = 0, curIndex = null, loopDepth = 0, mainLoop = null;
+
+            const segAt = () => Math.min(Math.floor(t / SIM_HOLD), nseg - 1);
+            const advance = dt => { t += dt; if (++steps > SIM_MAX_STEPS || t >= end) throw new SimStop(); };
+            const setOut = (pin, v) => { if (state[pin] !== v) { state[pin] = v; changes.push({ t, s: { ...state } }); } };
+            const sensor = pin => {
+                (reads[pin] = reads[pin] || new Array(nseg).fill(0))[segAt()]++;
+                const sg = segs ? segs[segAt()] : null;
+                let v = sg && sg.sensors && sg.sensors[pin] !== undefined ? sg.sensors[pin] : 0;
+                if (invertPins && invertPins.includes(pin)) v = 1 - v;
+                return v;
+            };
+            const updatePwm = pin => { const p = pwm[pin]; setOut(pin, p.duty ? `${p.freq}:${p.duty}` : 0); };
+            const builtin = fn => ({ type: 'builtin', fn });
+            const err = msg => new SimError(msg, curIndex);
+
+            const modules = {
+                machine: {
+                    Pin: { type: 'class', attrs: { OUT: 'OUT', IN: 'IN' }, make: a => ({ cls: 'Pin', pin: a[0], mode: a[1] }) },
+                    PWM: { type: 'class', attrs: {}, make: a => { const pin = a[0].pin; pwm[pin] = { freq: 0, duty: 0 }; return { cls: 'PWM', pin }; } },
+                    ADC: { type: 'class', attrs: {}, make: a => ({ cls: 'ADC', pin: typeof a[0] === 'number' ? a[0] : a[0].pin }) }
+                },
+                time: {
+                    sleep: builtin(a => { advance(a[0]); return null; }),
+                    sleep_ms: builtin(a => { advance(a[0] / 1000); return null; })
+                },
+                math: {
+                    log: builtin(a => { if (a[0] <= 0) throw err('math.log() was given a number that is not positive.'); return Math.log(a[0]); }),
+                    sqrt: builtin(a => Math.sqrt(a[0])), exp: builtin(a => Math.exp(a[0])), pi: Math.PI
+                }
+            };
+            const builtins = {
+                print: builtin(a => { prints.push({ t, text: a.map(simStr).join(' ') }); return null; }),
+                input: builtin(() => {
+                    const inp = scenario.inputs || [];
+                    if (inputsUsed >= inp.length) throw err('Your program asks the user for input more than once. The input() line only needs to run one time, so it belongs above the loop.');
+                    return inp[inputsUsed++];
+                }),
+                float: builtin(a => { const v = parseFloat(a[0]); if (isNaN(v)) throw err(`float() can't turn "${a[0]}" into a number.`); return v; }),
+                int: builtin(a => Math.trunc(typeof a[0] === 'string' ? parseFloat(a[0]) : a[0])),
+                str: builtin(a => simStr(a[0])),
+                len: builtin(a => a[0].length),
+                abs: builtin(a => Math.abs(a[0])),
+                round: builtin(a => a.length > 1 ? Number(a[0].toFixed(a[1])) : Math.round(a[0])),
+                min: builtin(a => Math.min(...a)), max: builtin(a => Math.max(...a)),
+                range: builtin(a => {
+                    if (a.some(x => typeof x !== 'number')) throw err('range() needs whole numbers.');
+                    const [s, e, st] = a.length === 1 ? [0, a[0], 1] : [a[0], a[1], a[2] || 1];
+                    const out = []; for (let i = s; st > 0 ? i < e : i > e; i += st) out.push(i); return out;
+                })
+            };
+
+            const nameError = name => {
+                const lines = studentLines;
+                const def = lines.find(l => new RegExp(`^def ${name}\\(`).test(l.text));
+                if (def) return new SimError(`${name}() is called before Python has run "${def.text}". Python runs from the top down, so a function's def block has to come before any code that calls it (and can't be after a loop that never ends).`, curIndex);
+                const imp = lines.find(l => new RegExp(`^(from \\w+ import .*\\b${name}\\b|import ${name}$)`).test(l.text));
+                if (imp) return new SimError(`${name} is used before the line "${imp.text}" has run. Imports need to come before the code that uses them.`, curIndex);
+                const asg = lines.find(l => new RegExp(`^(${name}\\s*=(?!=)|for ${name} in )`).test(l.text));
+                if (asg) {
+                    if (asg.indent > 0 && !problem.codeBlocks.some(b => b.text === asg.text && b.correctIndent === 0)) {
+                        const owner = [...lines].reverse().find(l => l.index < asg.index && l.indent < asg.indent && /^def /.test(l.text));
+                        if (owner) return new SimError(`"${name}" is used outside the function where it is created ("${owner.text}"). Variables made inside a function only exist inside it.`, curIndex);
+                    }
+                    return new SimError(`"${name}" is used before the line "${asg.text}" has run. Python runs from the top down, so a variable has to be set before it's used.`, curIndex);
+                }
+                return new SimError(`"${name}" isn't defined at this point in the program.`, curIndex);
+            };
+            const lookup = (name, fr) => {
+                if (fr && fr.localNames.has(name)) {
+                    if (name in fr.locals) return fr.locals[name];
+                    throw err(`"${name}" is used inside ${fr.fname}() before the line that sets it has run.`);
+                }
+                if (name in globals) return globals[name];
+                if (name in builtins) return builtins[name];
+                throw nameError(name);
+            };
+            const assign = (name, v, fr) => { if (fr) fr.locals[name] = v; else globals[name] = v; };
+
+            const getAttr = (o, n) => {
+                if (o && o.type === 'class') { if (n in o.attrs) return o.attrs[n]; }
+                else if (o && o.cls === 'module') { if (n in o.attrs) return o.attrs[n]; }
+                else if (o && (o.cls || Array.isArray(o))) return { type: 'method', obj: o, name: n };
+                throw err(`This line asks for ".${n}", which doesn't exist here.`);
+            };
+            const callMethod = (o, n, a) => {
+                if (o.cls === 'Pin') {
+                    if (n === 'value') {
+                        if (a.length) { setOut(o.pin, simTruthy(a[0]) ? 1 : 0); return null; }
+                        return o.mode === 'IN' ? sensor(o.pin) : (state[o.pin] || 0);
+                    }
+                    if (n === 'on') { setOut(o.pin, 1); return null; }
+                    if (n === 'off') { setOut(o.pin, 0); return null; }
+                    if (n === 'toggle') { setOut(o.pin, state[o.pin] ? 0 : 1); return null; }
+                }
+                if (o.cls === 'PWM') {
+                    if (n === 'freq') { pwm[o.pin].freq = a[0]; updatePwm(o.pin); return null; }
+                    if (n === 'duty_u16') { pwm[o.pin].duty = a[0]; updatePwm(o.pin); return null; }
+                    if (n === 'deinit') { pwm[o.pin].duty = 0; updatePwm(o.pin); return null; }
+                }
+                if (o.cls === 'ADC' && n === 'read_u16') return sensor(o.pin);
+                if (Array.isArray(o) && n === 'append') { o.push(a[0]); return null; }
+                throw err(`.${n}() can't be used here.`);
+            };
+            const call = (f, args, fr) => {
+                if (!f || typeof f !== 'object') throw err("This line tries to call something that isn't a function.");
+                if (f.type === 'builtin') return f.fn(args);
+                if (f.type === 'class') return f.make(args);
+                if (f.type === 'method') return callMethod(f.obj, f.name, args);
+                if (f.type === 'func') {
+                    const depth = fr ? fr.depth + 1 : 1;
+                    if (depth > SIM_MAX_DEPTH) throw err(`${f.node.name}() ends up calling itself over and over. Check the indentation of the line that calls it: it shouldn't be inside the ${f.node.name}() function.`);
+                    if (args.length !== f.node.params.length) throw err(`${f.node.name}() needs ${f.node.params.length} value(s) in the parentheses, but got ${args.length}.`);
+                    const frame = { fname: f.node.name, locals: {}, localNames: f.node.localNames, depth };
+                    f.node.params.forEach((pn, i) => { frame.locals[pn] = args[i]; });
+                    const saved = curIndex;
+                    try { exec(f.node.children, frame); }
+                    catch (e) { if (e instanceof SimReturn) { curIndex = saved; return e.value; } throw e; }
+                    curIndex = saved;
+                    return null;
+                }
+                throw err("This line tries to call something that isn't a function.");
+            };
+            const cmp = (op, a, b) => {
+                switch (op) {
+                    case '<': return a < b; case '>': return a > b;
+                    case '<=': return a <= b; case '>=': return a >= b;
+                    case '==': return a === b; case '!=': return a !== b;
+                }
+            };
+            const ev = (e, fr) => {
+                switch (e.k) {
+                    case 'const': return e.v;
+                    case 'fstr': return e.parts.map(pt => pt.lit !== undefined ? pt.lit : simFormat(ev(pt.e, fr), pt.spec)).join('');
+                    case 'name': return lookup(e.v, fr);
+                    case 'list': return e.items.map(x => ev(x, fr));
+                    case 'not': return !simTruthy(ev(e.e, fr));
+                    case 'and': { const l = ev(e.l, fr); return simTruthy(l) ? ev(e.r, fr) : l; }
+                    case 'or': { const l = ev(e.l, fr); return simTruthy(l) ? l : ev(e.r, fr); }
+                    case 'neg': return -ev(e.e, fr);
+                    case 'bin': {
+                        const a = ev(e.l, fr), b = ev(e.r, fr);
+                        if ((typeof a === 'string') !== (typeof b === 'string') && e.op === '+') throw err("This line adds text and a number together, which Python doesn't allow.");
+                        switch (e.op) {
+                            case '+': return a + b; case '-': return a - b; case '*': return a * b;
+                            case '/': if (b === 0) throw err('This line divides by zero.'); return a / b;
+                            case '//': if (b === 0) throw err('This line divides by zero.'); return Math.floor(a / b);
+                            case '%': return ((a % b) + b) % b;
+                            case '**': return a ** b;
+                        }
+                        break;
+                    }
+                    case 'cmp': {
+                        let l = ev(e.first, fr);
+                        for (let i = 0; i < e.ops.length; i++) {
+                            const r = ev(e.rs[i], fr);
+                            if (!cmp(e.ops[i], l, r)) return false;
+                            l = r;
+                        }
+                        return true;
+                    }
+                    case 'attr': return getAttr(ev(e.o, fr), e.n);
+                    case 'index': { const o = ev(e.o, fr), i = ev(e.i, fr); return o[i < 0 ? o.length + i : i]; }
+                    case 'call': { const f = ev(e.f, fr); return call(f, e.args.map(x => ev(x, fr)), fr); }
+                }
+            };
+            const exec = (nodes, fr) => {
+                for (const n of nodes) {
+                    curIndex = n.index;
+                    advance(SIM_TICK);
+                    try {
+                        switch (n.kind) {
+                            case 'from': {
+                                const mod = modules[n.mod];
+                                if (!mod) throw err(`There is no module called ${n.mod}.`);
+                                for (const nm of n.names) {
+                                    if (!(nm in mod)) throw err(`"${nm}" can't be imported from ${n.mod}.`);
+                                    assign(nm, mod[nm], fr);
+                                }
+                                break;
+                            }
+                            case 'import':
+                                if (!modules[n.mod]) throw err(`There is no module called ${n.mod}.`);
+                                assign(n.mod, { cls: 'module', attrs: modules[n.mod] }, fr);
+                                break;
+                            case 'def':
+                                assign(n.name, { type: 'func', node: n }, fr);
+                                if (n.index !== null && (fr || loopDepth > 0)) notes.add('nestedDef');
+                                break;
+                            case 'assign': {
+                                const v = ev(n.e, fr);
+                                assign(n.name, v, fr);
+                                if (n.index !== null && loopDepth > 0 && v && ['Pin', 'PWM', 'ADC'].includes(v.cls)) notes.add('setupInLoop');
+                                break;
+                            }
+                            case 'expr': ev(n.e, fr); break;
+                            case 'pass': break;
+                            case 'return': throw new SimReturn(n.e ? ev(n.e, fr) : null);
+                            case 'while':
+                                if (!mainLoop) mainLoop = n;
+                                loopDepth++;
+                                try {
+                                    while (simTruthy(ev(n.cond, fr))) {
+                                        if (n === mainLoop) passes.push(t);
+                                        advance(SIM_TICK);
+                                        exec(n.children, fr);
+                                        curIndex = n.index;
+                                    }
+                                } finally { loopDepth--; }
+                                break;
+                            case 'for': {
+                                const it = ev(n.iter, fr);
+                                if (!Array.isArray(it) && typeof it !== 'string') throw err(`"${n.text}" needs a list (or range) to loop over.`);
+                                if (!mainLoop) mainLoop = n;
+                                loopDepth++;
+                                try {
+                                    for (const x of it) {
+                                        if (n === mainLoop) passes.push(t);
+                                        assign(n.target, x, fr);
+                                        advance(SIM_TICK);
+                                        exec(n.children, fr);
+                                        curIndex = n.index;
+                                    }
+                                } finally { loopDepth--; }
+                                break;
+                            }
+                            case 'if': {
+                                const branches = [{ cond: n.cond, children: n.children, index: n.index }, ...n.branches];
+                                for (const b of branches) {
+                                    curIndex = b.index;
+                                    if (b.kind === 'else' || simTruthy(ev(b.cond, fr))) { exec(b.children, fr); break; }
+                                }
+                                break;
+                            }
+                        }
+                    } catch (e) {
+                        if (e instanceof SimError || e instanceof SimStop || e instanceof SimReturn) throw e;
+                        throw new SimError(`Python would stop with an error on the line "${n.text}".`, n.index);
+                    }
+                }
+            };
+
+            let finished = true;
+            try {
+                for (const tree of trees) exec(tree.children, null);
+            } catch (e) {
+                if (e instanceof SimStop) finished = false;
+                else throw e;
+            }
+            return { finished, endT: t, changes, prints, passes, reads, notes, nseg };
+        }
+
+        // ---------- Turning a run into "what you would see and hear" ----------
+        const simKey = s => JSON.stringify(Object.keys(s).sort().map(k => [k, s[k]]));
+        const simIsOn = v => v !== 0 && v !== undefined && !(typeof v === 'string' && v.split('|').every(x => x === '0'));
+        const simDurClose = (a, b) => (a === null && b === null) ||
+            (a !== null && b !== null && Math.abs(a - b) <= 0.02 + 0.05 * Math.max(a, b));
+
+        // Pin-level state -> one value per output (an RGB LED is one output)
+        function simProject(problem, s) {
+            const out = {};
+            (problem.outputs || []).forEach((o, i) => {
+                const vals = o.pins.map(pin => s[pin] === undefined ? 0 : s[pin]);
+                out['o' + i] = vals.length === 1 ? vals[0] : vals.join('|');
+            });
+            return out;
+        }
+
+        function simRawSegments(changes, a, b) {
+            let i = 0;
+            while (i + 1 < changes.length && changes[i + 1].t <= a) i++;
+            const segs = [];
+            let cur = changes[i].s, ct = a;
+            for (let j = i + 1; j < changes.length && changes[j].t < b; j++) {
+                segs.push({ s: cur, d: changes[j].t - ct });
+                cur = changes[j].s; ct = changes[j].t;
+            }
+            segs.push({ s: cur, d: b - ct });
+            return segs;
+        }
+
+        function simMerge(segs) {
+            const out = [];
+            for (const x of segs) {
+                if (out.length && out[out.length - 1].k === x.k) out[out.length - 1].d += x.d;
+                else out.push({ ...x });
+            }
+            return out;
+        }
+
+        // Cyclic pattern of visible states (for loops that run forever)
+        function simCanonical(raw, project) {
+            let segs = simMerge(raw.map(x => { const s = project(x.s); return { s, k: simKey(s), d: x.d }; }));
+            const longest = () => { const b = segs.reduce((m, x) => (x.d > m.d ? x : m)); return [{ ...b, d: null }]; };
+            const total = segs.reduce((sum, x) => sum + x.d, 0);
+            if (total < SIM_VISIBLE) return longest();
+            const visible = segs.filter(x => x.d >= SIM_VISIBLE);
+            if (!visible.length) return longest();
+            segs = simMerge(visible);
+            if (segs.length > 1 && segs[0].k === segs[segs.length - 1].k) segs[0].d += segs.pop().d;
+            if (segs.length === 1) return [{ ...segs[0], d: null }];
+            const n = segs.length;
+            for (let p = 1; p < n; p++) {
+                if (n % p) continue;
+                let ok = true;
+                for (let i = p; i < n && ok; i++) ok = segs[i].k === segs[i - p].k && simDurClose(segs[i].d, segs[i - p].d);
+                if (ok) return segs.slice(0, p);
+            }
+            return segs;
+        }
+
+        function simCyclicMatch(A, B, allowReverse, checkDurations = true) {
+            if (A.length !== B.length) return false;
+            const n = A.length;
+            if (n === 0) return true;
+            for (const C of allowReverse ? [B, [...B].reverse()] : [B]) {
+                for (let rot = 0; rot < n; rot++) {
+                    let ok = true;
+                    for (let i = 0; i < n && ok; i++) {
+                        const c = C[(i + rot) % n];
+                        ok = A[i].k === c.k && (!checkDurations || simDurClose(A[i].d, c.d));
+                    }
+                    if (ok) return true;
+                }
+            }
+            return false;
+        }
+
+        function simJoin(labels) {
+            labels = [...new Set(labels)];
+            if (labels.length === 1) return labels[0];
+            return labels.slice(0, -1).join(', ') + ' and ' + labels[labels.length - 1];
+        }
+
+        function simServoAngle(v) {
+            const duty = parseFloat(String(v).split(':')[1]);
+            return Math.round((duty / 65535 * 20 - 0.5) / 2 * 180);
+        }
+
+        function simDescribeValue(o, v) {
+            if (o.kind === 'servo') return simIsOn(v) ? `at ${simServoAngle(v)}°` : 'not set to any angle';
+            if (o.kind === 'buzzer') return simIsOn(v) ? `playing ${parseFloat(String(v))} Hz` : 'silent';
+            return simIsOn(v) ? 'on' : 'off';
+        }
+
+        // ----- loops that run forever: compare one segment -----
+        function simWindow(run, segIdx) {
+            const ps = run.passes.filter(t => Math.min(Math.floor(t / SIM_HOLD), run.nseg - 1) === segIdx);
+            if (ps.length < 3) return null;
+            const a = ps[ps.length - 3], b = ps[ps.length - 1];
+            return {
+                raw: simRawSegments(run.changes, a, b),
+                prints: run.prints.filter(p => p.t >= a && p.t < b).map(p => ({ k: p.text, d: null })),
+                period: (b - a) / 2
+            };
+        }
+
+        function simCompareSegment(problem, ref, stu) {
+            const refPlain = simCanonical(ref.raw, s => simProject(problem, s));
+            const keys = Object.keys(simProject(problem, {}));
+            const varying = keys.filter(k => new Set(refPlain.map(x => x.s[k])).size > 1);
+            const project = s => {
+                const p = simProject(problem, s);
+                for (const k of keys) if (!varying.includes(k)) p[k] = simIsOn(p[k]) ? 1 : 0;
+                return p;
+            };
+            const r = simCanonical(ref.raw, project), s = simCanonical(stu.raw, project);
+            const statesOk = simCyclicMatch(r, s, !!problem.acceptReversed);
+            const printsOk = simCyclicMatch(ref.prints, stu.prints, false, false);
+            const periodOk = !ref.prints.length || simDurClose(ref.period, stu.period);
+            return { ok: statesOk && printsOk && periodOk, statesOk, printsOk, periodOk, ref: r, stu: s, varying, refW: ref, stuW: stu };
+        }
+
+        function simDescribeSegment(problem, desc, cmp) {
+            const where = desc ? desc + ', ' : '';
+            const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+            if (!cmp.printsOk) {
+                const rp = cmp.refW.prints.map(p => p.k), sp = cmp.stuW.prints.map(p => p.k);
+                if (rp.length !== sp.length) {
+                    const per = n => Math.round(n / 2);
+                    return cap(`${where}each pass through the loop should print ${per(rp.length)} line${per(rp.length) === 1 ? '' : 's'}, but yours prints ${per(sp.length)}.`);
+                }
+                const want = rp.find(x => !sp.includes(x)), got = sp.find(x => !rp.includes(x));
+                if (want !== undefined) return cap(`${where}your program should print "${want}", but it prints "${got}".`);
+                return cap(`${where}your program prints the right lines but in the wrong order.`);
+            }
+            if (!cmp.periodOk) {
+                return cap(`${where}your loop repeats every ${cmp.stuW.period.toFixed(2)} s instead of every ${cmp.refW.period.toFixed(2)} s. Check where sleep() is.`);
+            }
+            const { ref, stu, varying } = cmp;
+            const outs = problem.outputs || [];
+            const lit = seq => new Set(seq.flatMap(x => Object.keys(x.s).filter(k => simIsOn(x.s[k]))));
+            const refLit = lit(ref), stuLit = lit(stu);
+            const label = k => outs[+k.slice(1)].label;
+            const shouldLight = [...refLit].filter(k => !stuLit.has(k));
+            const shouldNot = [...stuLit].filter(k => !refLit.has(k));
+            const hasSleep = problem.codeBlocks.some(b => /^sleep/.test(b.text));
+            if (shouldLight.length) {
+                const one = new Set(shouldLight.map(label)).size === 1;
+                return cap(`${where}${simJoin(shouldLight.map(label))} should light up, but in your code ${one ? 'it never stays' : 'they never stay'} on long enough to see. Check which lines turn ${one ? 'it' : 'them'} on and off${hasSleep ? ', and where the sleep() calls are' : ''}.`);
+            }
+            if (shouldNot.length) {
+                const one = new Set(shouldNot.map(label)).size === 1;
+                return cap(`${where}${simJoin(shouldNot.map(label))} should be off, but your code leaves ${one ? 'it' : 'them'} on. Check where the line that turns ${one ? 'it' : 'them'} off is.`);
+            }
+            for (const k of varying) {
+                const o = outs[+k.slice(1)];
+                const vals = seq => new Set(seq.map(x => x.s[k]).filter(simIsOn));
+                const rv = vals(ref), sv = vals(stu);
+                if ([...rv].some(v => !sv.has(v)) && o.kind === 'rgb') {
+                    return cap(`${where}${o.label} should switch between ${rv.size} colors, but in your code it doesn't show each color long enough to see. Each color_set() needs a sleep() after it.`);
+                }
+            }
+            if (ref.length > 1 && stu.length === 1) return cap(`${where}the lights should change over time, but in your code they never visibly change. Make sure each sleep() pauses between two changes.`);
+            if (ref.length === 1 && stu.length > 1) return cap(`${where}the lights should hold steady, but in your code they change over time. Check where your sleep() and value() lines are.`);
+            if (simCyclicMatch(ref, stu, !!problem.acceptReversed, false)) return cap(`${where}the lights follow the right pattern but the timing is off. Check where each sleep() is.`);
+            return cap(`${where}the right lights turn on, but not in the right pattern. Check the order of your lines: each light should be on during a sleep(), then turned off.`);
+        }
+
+        // ----- programs that finish: compare the whole run -----
+        function simFiniteTrace(problem, run) {
+            const prints = run.prints.map(p => p.text);
+            const outs = problem.outputs || [];
+            const bi = outs.findIndex(o => o.kind === 'buzzer');
+            const raw = simRawSegments(run.changes, 0, run.endT);
+            let segs = simMerge(raw.map(x => { const s = simProject(problem, x.s); return { s, k: simKey(s), d: x.d }; }));
+            const last = segs[segs.length - 1].s;
+            segs = simMerge(segs.filter(x => x.d >= SIM_VISIBLE));
+            const tones = [];
+            let t = 0;
+            if (bi >= 0) {
+                const bk = 'o' + bi;
+                for (let i = 0; i < segs.length; i++) {
+                    const v = segs[i].s[bk];
+                    if (simIsOn(v)) {
+                        const prev = tones[tones.length - 1];
+                        if (prev && prev.v === v && prev.start + prev.dur === t) {
+                            prev.dur += segs[i].d; prev.parts.push(segs[i]);
+                        } else {
+                            tones.push({ v, freq: parseFloat(String(v)), start: t, dur: segs[i].d, parts: [segs[i]] });
+                        }
+                    }
+                    t += segs[i].d;
+                }
+                for (const tone of tones) {
+                    let acc = 0, mid = tone.dur / 2, s = tone.parts[0].s;
+                    for (const part of tone.parts) { if (acc + part.d > mid) { s = part.s; break; } acc += part.d; }
+                    tone.others = {};
+                    outs.forEach((o, i) => { if (i !== bi) tone.others['o' + i] = s['o' + i]; });
+                }
+            }
+            return { prints, tones, final: last, bi };
+        }
+
+        function simCompareFinite(problem, desc, ref, stu) {
+            const pre = desc ? desc + ', ' : '';
+            const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+            const outs = problem.outputs || [];
+            if (ref.prints.length !== stu.prints.length) {
+                return cap(`${pre}your program prints ${stu.prints.length} line${stu.prints.length === 1 ? '' : 's'}, but it should print ${ref.prints.length}.`);
+            }
+            for (let i = 0; i < ref.prints.length; i++) {
+                if (ref.prints[i] !== stu.prints[i]) return cap(`${pre}line ${i + 1} of the output should be "${ref.prints[i]}", but your program prints "${stu.prints[i]}".`);
+            }
+            if (ref.tones.length !== stu.tones.length) {
+                return cap(`${pre}the buzzer should play ${ref.tones.length} notes you can hear, but your program plays ${stu.tones.length}. Check where tone() and sleep_ms() are.`);
+            }
+            for (let i = 0; i < ref.tones.length; i++) {
+                const a = ref.tones[i], b = stu.tones[i];
+                if (a.freq !== b.freq) return cap(`${pre}note ${i + 1} should be ${a.freq} Hz, but your program plays ${b.freq} Hz.`);
+                if (!simDurClose(a.dur, b.dur)) return cap(`${pre}note ${i + 1} lasts ${Math.round(b.dur * 100) * 10} ms instead of ${Math.round(a.dur * 100) * 10} ms.`);
+                if (i > 0) {
+                    const ga = a.start - (ref.tones[i - 1].start + ref.tones[i - 1].dur);
+                    const gb = b.start - (stu.tones[i - 1].start + stu.tones[i - 1].dur);
+                    if (!simDurClose(ga, gb)) return cap(`${pre}the pause before note ${i + 1} is ${Math.round(gb * 100) * 10} ms instead of ${Math.round(ga * 100) * 10} ms. Check where sleep_ms() is.`);
+                }
+                for (const k of Object.keys(a.others)) {
+                    if (a.others[k] !== b.others[k]) {
+                        const o = outs[+k.slice(1)];
+                        // Showing the previous note's LEDs means the LEDs are set after tone()
+                        const prev = i > 0 ? ref.tones[i - 1].others : null;
+                        const lagging = Object.keys(b.others).every(j => prev ? b.others[j] === prev[j] : !simIsOn(b.others[j]));
+                        const hint = lagging ? 'Set the LEDs before tone() plays the note.' : 'Check which LEDs each branch of your if/else turns on and off.';
+                        return cap(`${pre}while note ${i + 1} (${a.freq} Hz) plays, ${o.label} should be ${simDescribeValue(o, a.others[k])}, but in your code it's ${simDescribeValue(o, b.others[k])}. ${hint}`);
+                    }
+                }
+            }
+            for (const k of Object.keys(ref.final)) {
+                if (+k.slice(1) === ref.bi) continue;
+                if (ref.final[k] !== stu.final[k]) {
+                    const o = outs[+k.slice(1)];
+                    return cap(`${pre}${o.label} should end up ${simDescribeValue(o, ref.final[k])}, but your code leaves it ${simDescribeValue(o, stu.final[k])}.`);
+                }
+            }
+            return null;
+        }
+
+        // Main entry point. Returns { valid, message, index (block to highlight), notes }
+        function validateByBehavior(problem, solution) {
+            const lines = solution.map((sb, index) => ({ text: findBlock(sb.id).text, indent: sb.indent, index }));
+            const refLines = problem.codeBlocks.map((b, index) => ({ text: b.text, indent: b.correctIndent, index }));
+            const setup = simBuildTree(simSourceLines(problem.staticCode));
+
+            let tree;
+            try { tree = simBuildTree(lines); }
+            catch (e) { if (e instanceof SimError) return { valid: false, message: e.message, index: e.index }; throw e; }
+            const refTree = simBuildTree(refLines);
+
+            const notes = new Set();
+            const mappings = problem.invertPins ? [null, problem.invertPins] : [null];
+            const results = mappings.map(() => ({ matched: 0, miss: null }));
+
+            for (const sc of problem.scenarios) {
+                let run;
+                try { run = simRun([setup, tree], problem, sc, lines, null); }
+                catch (e) { if (e instanceof SimError) return { valid: false, message: e.message, index: e.index }; throw e; }
+                run.notes.forEach(n => notes.add(n));
+
+                if (!sc.segments) {
+                    if (!run.finished) return { valid: false, message: "Your program never finishes. Check for a loop that can't end." };
+                    const refRun = simRun([setup, refTree], problem, sc, refLines, null);
+                    const msg = simCompareFinite(problem, sc.desc, simFiniteTrace(problem, refRun), simFiniteTrace(problem, run));
+                    if (msg) return { valid: false, message: msg };
+                    continue;
+                }
+
+                if (run.finished) {
+                    return { valid: false, message: "Your program runs once and then stops. Everything that should repeat must be indented inside while True:." };
+                }
+                for (let m = 0; m < mappings.length; m++) {
+                    const refRun = simRun([setup, refTree], problem, sc, refLines, mappings[m]);
+                    // A sensor the reference keeps reading but the student doesn't
+                    for (const pin of Object.keys(problem.sensors || {})) {
+                        const rr = refRun.reads[pin], sr = run.reads[pin] || new Array(run.nseg).fill(0);
+                        if (!rr || rr.slice(1).some(c => c === 0)) continue;
+                        if (sr.every(c => c === 0)) return { valid: false, message: `Your program never reads ${problem.sensors[pin]}, so it can't respond to it. Check that the line that reads it is inside while True: and actually runs.` };
+                        if (sr.slice(1).some(c => c === 0)) return { valid: false, message: `Your program reads ${problem.sensors[pin]} only once, so changing it has no effect. The line that reads it needs to be inside while True:.` };
+                    }
+                    for (let s = 0; s < sc.segments.length; s++) {
+                        const stuW = simWindow(run, s);
+                        if (!stuW) return { valid: false, message: "Your program gets stuck and never repeats its main loop. Check the indentation of your loop lines." };
+                        const cmp = simCompareSegment(problem, simWindow(refRun, s), stuW);
+                        if (cmp.ok) results[m].matched++;
+                        else if (!results[m].miss) results[m].miss = { desc: sc.segments[s].desc, cmp };
+                    }
+                }
+            }
+
+            if (results.some(r => !r.miss)) return { valid: true, notes: [...notes] };
+            const best = results.reduce((a, b) => (b.matched > a.matched ? b : a));
+            return { valid: false, message: simDescribeSegment(problem, best.miss.desc, best.miss.cmp) };
+        }
+
+        // Helper for problem configs: the same segments for every switch-style test
+        function switchScenarios(pin) {
+            const seg = v => ({ sensors: { [pin]: v }, desc: `With the switch reading ${v}` });
+            return [{ segments: [seg(1), seg(0), seg(1)] }, { segments: [seg(0), seg(1), seg(0)] }];
+        }
+
+        const NOTE_TEXT = {
+            nestedDef: "Tip: your code works, but def blocks normally go at the left edge (no indentation), above the main code, so each function is defined once.",
+            setupInLoop: "Tip: your code works, but lines that set up hardware (like Pin(...)) only need to run once, so they normally go above the loop instead of inside it."
+        };
+
+        // Actions
         function checkSolution() {
             attempts++;
             const problem = problems[currentProblem];
-            
+
             if (attempts >= 2) {
                 document.getElementById('hintBtn').classList.remove('hidden');
             }
 
-            // Check for distractors
+            if (solutionBlocks.length === 0) {
+                showFeedback(false, "Drag code blocks into Your Solution to build your program.");
+                return;
+            }
+
+            // Distractors in the solution
             const distractorIds = problem.distractors.map(d => d.id);
-            const distractorsInSolution = solutionBlocks.filter(sb => distractorIds.includes(sb.id));
-            
-            if (distractorsInSolution.length > 0) {
-                const distractor = problem.distractors.find(d => d.id === distractorsInSolution[0].id);
-                showFeedback(false, `This line doesn't belong: "${distractor.text}" — ${distractor.reason}`);
+            const distractorIndex = solutionBlocks.findIndex(sb => distractorIds.includes(sb.id));
+            if (distractorIndex !== -1) {
+                const distractor = problem.distractors.find(d => d.id === solutionBlocks[distractorIndex].id);
+                showFeedback(false, `This line doesn't belong: "${escapeHtml(distractor.text)}". ${escapeHtml(distractor.reason)}`, distractorIndex);
                 return;
             }
 
-            // Check block count
-            if (solutionBlocks.length !== problem.codeBlocks.length) {
-                showFeedback(false, `Your solution has ${solutionBlocks.length} lines, but the correct solution needs ${problem.codeBlocks.length} lines.`);
+            // Real blocks that were thrown away or not used yet
+            const realIds = problem.codeBlocks.map(b => b.id);
+            const trashedReal = discardedBlocks.filter(b => realIds.includes(b.id));
+            if (trashedReal.length > 0) {
+                showFeedback(false, `"${escapeHtml(trashedReal[0].text)}" is not a distractor. It belongs in your solution, so drag it back out of the discarded pile.`);
+                return;
+            }
+            const unusedReal = availableBlocks.filter(b => realIds.includes(b.id));
+            if (unusedReal.length > 0) {
+                const n = unusedReal.length;
+                showFeedback(false, `There ${n === 1 ? 'is still 1 block' : `are still ${n} blocks`} in the Code Blocks area that ${n === 1 ? 'belongs' : 'belong'} in your solution. Every block except the distractors gets used.`);
                 return;
             }
 
-            // Compare by TEXT, not IDs (handles identical-text blocks)
-            const expectedTexts = problem.codeBlocks.map(cb => cb.text);
-            const solutionTexts = solutionBlocks.map(sb => {
-                const block = findBlock(sb.id);
-                return block.text;
-            });
-            
-            let orderCorrect = true;
-            for (let i = 0; i < expectedTexts.length; i++) {
-                if (solutionTexts[i] !== expectedTexts[i]) {
-                    orderCorrect = false;
-                    break;
-                }
-            }
-
-            if (!orderCorrect) {
-                showFeedback(false, "The blocks are in the wrong order. Think about the structure: loop first, then what happens for each item.");
+            const result = validateByBehavior(problem, solutionBlocks);
+            if (!result.valid) {
+                showFeedback(false, escapeHtml(result.message), result.index);
                 return;
             }
 
-            // Check indentation by position
-            const indentErrors = [];
-            solutionBlocks.forEach((sb, index) => {
-                const expectedBlock = problem.codeBlocks[index];
-                if (sb.indent !== expectedBlock.correctIndent) {
-                    const block = findBlock(sb.id);
-                    indentErrors.push({
-                        text: block.text,
-                        got: sb.indent,
-                        expected: expectedBlock.correctIndent
-                    });
-                }
-            });
-
-            if (indentErrors.length > 0) {
-                const err = indentErrors[0];
-                const direction = err.got < err.expected ? "needs more indentation" : "has too much indentation";
-                showFeedback(false, `Indentation error: "${err.text}" ${direction}. Code inside loops and if/else must be indented.`);
-                return;
-            }
-
-            showFeedback(true, "Excellent! Your code is correct — including the indentation!");
+            const tips = (result.notes || []).map(n => NOTE_TEXT[n]).filter(Boolean);
+            showFeedback(true, "Excellent! Your code is correct, including the indentation." + (tips.length ? '<br><br>' + tips.join('<br>') : ''));
         }
 
         function resetProblem() {
