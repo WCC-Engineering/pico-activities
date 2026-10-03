@@ -249,6 +249,12 @@
             color: #991b1b;
         }
 
+        .code-block.error-highlight {
+            background: #fffbeb;
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.3);
+        }
+
         .code-block .grip {
             color: #94a3b8;
             flex-shrink: 0;
@@ -607,15 +613,19 @@ led = <span class="function">Pin</span>(<span class="number">15</span>, Pin.OUT)
                     { id: 'a6', text: "led.value(0)", correctIndent: 2 },
                 ],
                 distractors: [
-                    { id: 'd1', text: "switch = Pin(14, Pin.OUT)", correctIndent: 0, reason: "Use Pin.IN for inputs like switches, Pin.OUT is for outputs like LEDs" },
-                    { id: 'd2', text: "if switch.value(1):", correctIndent: 1, reason: "switch.value() reads the switch — don't put a number inside. Use == 1 to compare" },
-                    { id: 'd3', text: "if switch.value() = 1:", correctIndent: 1, reason: "Use == for comparison, single = is for assignment" },
-                ]
+                    { id: 'd1', text: "switch = Pin(14, Pin.OUT)", correctIndent: 0, reason: "Use Pin.IN for inputs like switches. Pin.OUT is for outputs like LEDs." },
+                    { id: 'd2', text: "if switch.value(1):", correctIndent: 1, reason: "switch.value() reads the switch, so don't put a number inside the parentheses. Use == 1 to compare." },
+                    { id: 'd3', text: "if switch.value() = 1:", correctIndent: 1, reason: "Use == to compare. A single = is for assignment." },
+                ],
+                // Behavior checking: names created by the setup code, and the outputs to watch
+                predefined: ['led'],
+                channels: { led: 'the LED (GP15)' },
+                flexibleSwitch: false   // description says value 1 = LED on
             },
             {
                 id: 2,
                 title: "Switch Selects Between Two Functions",
-                description: "Define two functions: show_left() blinks the LED on GP15, show_right() blinks the LED on GP16. Use the switch to choose which function runs.",
+                description: "Define two functions: show_left() lights the LED on GP15 and show_right() lights the LED on GP16. Use the switch to choose which function runs, so the switch position decides which LED is lit.",
                 circuitHint: "Switch on GP14. LEDs on GP15 and GP16, each with 330Ω resistors.",
                 staticCode: `from machine import Pin
 from time import sleep
@@ -645,25 +655,13 @@ switch = <span class="function">Pin</span>(<span class="number">14</span>, Pin.I
                     { id: 'b13', text: "show_right()", correctIndent: 2 },
                 ],
                 distractors: [
-                    { id: 'd4', text: "function show_left()", correctIndent: 0, reason: "Python uses 'def' to define functions, not 'function' — that's JavaScript syntax" },
+                    { id: 'd4', text: "function show_left()", correctIndent: 0, reason: "Python uses def to define functions. The word function is JavaScript syntax." },
                     { id: 'd5', text: "show_left", correctIndent: 2, reason: "To call a function, you need parentheses: show_left()" },
                     { id: 'd6', text: "def show_left()", correctIndent: 0, reason: "Function definitions need a colon at the end: def show_left():" },
                 ],
-                flexibleOrder: {
-                    groups: [
-                        { name: "show_left() function", ids: ['b1', 'b2', 'b3', 'b4'] },
-                        { name: "show_right() function", ids: ['b5', 'b6', 'b7', 'b8'] }
-                    ],
-                    orderConstraints: [
-                        { before: 'b1', after: 'b9', message: "def show_left(): must come before the while loop" },
-                        { before: 'b5', after: 'b9', message: "def show_right(): must come before the while loop" }
-                    ],
-                    expectedIndents: {
-                        'b1': 0, 'b2': 1, 'b3': 1, 'b4': 1,
-                        'b5': 0, 'b6': 1, 'b7': 1, 'b8': 1,
-                        'b9': 0, 'b10': 1, 'b11': 2, 'b12': 1, 'b13': 2
-                    }
-                }
+                predefined: ['led_left', 'led_right', 'switch'],
+                channels: { led_left: 'the left LED (GP15)', led_right: 'the right LED (GP16)' },
+                flexibleSwitch: true    // either function may go in the if branch
             },
             {
                 id: 3,
@@ -753,32 +751,15 @@ blue.<span class="function">freq</span>(<span class="number">1000</span>)
                     { id: 'c20', text: "show_color()", correctIndent: 2 },
                 ],
                 distractors: [
-                    { id: 'd7', text: "led1.value(1)", correctIndent: 0, reason: "Code inside a function must be indented under the def line" },
-                    { id: 'd8', text: "color_set(255, 0)", correctIndent: 1, reason: "color_set() needs three values: red, green, blue" },
-                    { id: 'd9', text: "red.value(255)", correctIndent: 1, reason: "RGB LED uses PWM — use color_set() or duty_u16(), not value()" },
-                    { id: 'd10', text: "def led_chase()", correctIndent: 0, reason: "Function definitions need a colon at the end" },
+                    { id: 'd7', text: "led1 = 1", correctIndent: 1, reason: "This replaces led1 with the number 1 instead of turning the LED on. Use led1.value(1)." },
+                    { id: 'd8', text: "color_set(255, 0)", correctIndent: 1, reason: "color_set() needs three values: red, green, and blue." },
+                    { id: 'd9', text: "red.value(255)", correctIndent: 1, reason: "The RGB LED is controlled with PWM, so use color_set() instead of value()." },
+                    { id: 'd10', text: "def led_chase()", correctIndent: 0, reason: "Function definitions need a colon at the end: def led_chase():" },
                 ],
-                flexibleOrder: {
-                    groups: [
-                        { name: "led_chase() function", ids: ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8', 'c9', 'c10'] },
-                        { name: "show_color() function", ids: ['c11', 'c12', 'c13', 'c14', 'c15'] }
-                    ],
-                    orderConstraints: [
-                        { before: 'c1', after: 'c16', message: "def led_chase(): must come before the while loop" },
-                        { before: 'c11', after: 'c16', message: "def show_color(): must come before the while loop" }
-                    ],
-                    swappableInLoop: {
-                        whileId: 'c16',
-                        ifId: 'c17',
-                        elseId: 'c19',
-                        callIds: ['c18', 'c20']
-                    },
-                    expectedIndents: {
-                        'c1': 0, 'c2': 1, 'c3': 1, 'c4': 1, 'c5': 1, 'c6': 1, 'c7': 1, 'c8': 1, 'c9': 1, 'c10': 1,
-                        'c11': 0, 'c12': 1, 'c13': 1, 'c14': 1, 'c15': 1,
-                        'c16': 0, 'c17': 1, 'c18': 2, 'c19': 1, 'c20': 2
-                    }
-                }
+                predefined: ['led1', 'led2', 'led3', 'switch'],
+                channels: { led1: 'LED 1 (GP15)', led2: 'LED 2 (GP16)', led3: 'LED 3 (GP17)', rgb: 'the RGB LED' },
+                flexibleSwitch: true,   // either function may go in the if branch
+                acceptReversed: true    // chase may run in either direction
             }
         ];
 
@@ -986,8 +967,12 @@ blue.<span class="function">freq</span>(<span class="number">1000</span>)
             setupDragAndDrop();
         }
 
-        function showFeedback(correct, message) {
+        function showFeedback(correct, message, highlightIndex) {
             const area = document.getElementById('feedbackArea');
+            if (!correct && highlightIndex !== undefined && highlightIndex !== null) {
+                const el = document.querySelector(`#solutionArea .code-block[data-index="${highlightIndex}"]`);
+                if (el) el.classList.add('error-highlight');
+            }
             area.innerHTML = `
                 <div class="feedback ${correct ? 'success' : 'error'}">
                     ${correct ? icons.check : icons.x}
@@ -1139,11 +1124,25 @@ blue.<span class="function">freq</span>(<span class="number">1000</span>)
             const targetArea = targetEl.dataset.area;
             
             if (targetArea === 'solution') {
-                const targetIndex = parseInt(targetEl.dataset.index);
+                const targetId = targetEl.dataset.id;
+                if (targetId === draggedBlock.id) return;
+                // Drop above or below the target depending on which half was hit
+                const rect = targetEl.getBoundingClientRect();
+                const after = e.clientY > rect.top + rect.height / 2;
+                // Keep a block's indent when reordering; new blocks take the target's indent
+                const existing = solutionBlocks.find(sb => sb.id === draggedBlock.id);
+                const targetBlock = solutionBlocks.find(sb => sb.id === targetId);
+                const indent = existing ? existing.indent : targetBlock.indent;
                 removeBlockFromAll(draggedBlock.id);
-                solutionBlocks.splice(targetIndex, 0, { id: draggedBlock.id, indent: 0 });
+                let insertAt = solutionBlocks.findIndex(sb => sb.id === targetId);
+                if (after) insertAt++;
+                solutionBlocks.splice(insertAt, 0, { id: draggedBlock.id, indent });
                 clearFeedback();
                 renderProblem();
+            } else if (targetArea === 'available') {
+                handleDropOnAvailable(e);
+            } else {
+                handleDropOnTrash(e);
             }
         }
 
@@ -1163,8 +1162,9 @@ blue.<span class="function">freq</span>(<span class="number">1000</span>)
             e.preventDefault();
             if (!draggedBlock) return;
             
+            const existing = solutionBlocks.find(sb => sb.id === draggedBlock.id);
             removeBlockFromAll(draggedBlock.id);
-            solutionBlocks.push({ id: draggedBlock.id, indent: 0 });
+            solutionBlocks.push({ id: draggedBlock.id, indent: existing ? existing.indent : 0 });
             clearFeedback();
             renderProblem();
         }
@@ -1205,248 +1205,381 @@ blue.<span class="function">freq</span>(<span class="number">1000</span>)
             if (nextBtn) nextBtn.classList.add('hidden');
         }
 
-        // Flexible order validation for Problem 3
-        function validateFlexibleOrder(solutionBlocks, problem) {
-            const config = problem.flexibleOrder;
-            
-            // Build solution texts array
-            const solutionTexts = solutionBlocks.map(sb => {
-                const block = findBlock(sb.id);
-                return block.text;
-            });
-            
-            // Build expected texts for each group
-            const groupTexts = {};
-            for (const group of config.groups) {
-                groupTexts[group.name] = group.ids.map(id => {
-                    const block = problem.codeBlocks.find(cb => cb.id === id);
-                    return block.text;
-                });
-            }
-            
-            // Check each required group is present and contiguous in correct internal order (by TEXT)
-            for (const group of config.groups) {
-                const expectedTexts = groupTexts[group.name];
-                const firstText = expectedTexts[0];
-                
-                // Find where this group starts in solution
-                const startPos = solutionTexts.indexOf(firstText);
-                if (startPos === -1) {
-                    return { valid: false, message: `Missing the start of ${group.name}` };
+        // ================================================================
+        // Solution checking by SIMULATION
+        // ----------------------------------------------------------------
+        // Instead of comparing the student's arrangement to one answer key,
+        // the blocks are run through a tiny MicroPython simulator. Any
+        // arrangement that is valid Python and makes the LEDs do the same
+        // visible thing as the reference solution (the codeBlocks order) is
+        // accepted. This allows functions in either order, independent
+        // statements in either order, either function in the if branch
+        // (when flexibleSwitch is set), etc.
+        // ================================================================
+        const TICK = 0.0001;     // simulated seconds per executed line
+        const VISIBLE = 0.02;    // LED states shorter than this can't be seen
+        const HOLD = 6;          // simulated seconds per switch position
+        const MAX_STEPS = 3000000;
+        const MAX_DEPTH = 25;
+        const SCHEDULES = [[1, 0, 1], [0, 1, 0]];   // switch positions to test, including flips
+        const HEADER_KINDS = ['def', 'while', 'if', 'else'];
+
+        class SimError extends Error {
+            constructor(message, index) { super(message); this.index = index; }
+        }
+        class SimStop extends Error {}
+
+        function parseLine(text) {
+            let m;
+            if ((m = text.match(/^def (\w+)\(\):$/))) return { kind: 'def', name: m[1] };
+            if (text === 'while True:') return { kind: 'while' };
+            if ((m = text.match(/^if switch\.value\(\) == (\d):$/))) return { kind: 'if', value: +m[1] };
+            if (text === 'else:') return { kind: 'else' };
+            if ((m = text.match(/^sleep\(([\d.]+)\)$/))) return { kind: 'sleep', t: parseFloat(m[1]) };
+            if ((m = text.match(/^(\w+)\.value\((\d)\)$/))) return { kind: 'set', channel: m[1], value: +m[2] };
+            if ((m = text.match(/^color_set\((\d+), (\d+), (\d+)\)$/))) return { kind: 'set', channel: 'rgb', value: `${m[1]},${m[2]},${m[3]}` };
+            if ((m = text.match(/^(\w+) = Pin\(\d+, Pin\.IN\)$/))) return { kind: 'assign', name: m[1] };
+            if ((m = text.match(/^(\w+)\(\)$/))) return { kind: 'call', name: m[1] };
+            throw new Error('Simulator cannot interpret block: ' + text);
+        }
+
+        // Turn the flat list of (text, indent) lines into a Python block tree,
+        // reporting the same structural problems Python would.
+        function buildTree(lines) {
+            const root = { kind: 'root', indent: -1, children: [] };
+            const stack = [root];
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i];
+                const node = { ...line, ...parseLine(line.text), children: [] };
+                const prev = i > 0 ? lines[i - 1] : null;
+                const prevIsHeader = prev && HEADER_KINDS.includes(parseLine(prev.text).kind);
+
+                if (prevIsHeader) {
+                    if (line.indent !== prev.indent + 1) {
+                        throw new SimError(`"${prev.text}" ends with a colon, so the line right below it must be indented one step further than it is.`, i - 1);
+                    }
+                } else if (i === 0 ? line.indent !== 0 : line.indent > prev.indent) {
+                    throw new SimError(`"${line.text}" is indented further than Python allows here. A line can only be indented one more step when the line above it ends with a colon.`, i);
                 }
-                
-                // Check the group's blocks are contiguous and in order BY TEXT
-                for (let i = 0; i < expectedTexts.length; i++) {
-                    if (solutionTexts[startPos + i] !== expectedTexts[i]) {
-                        return { valid: false, message: `The ${group.name} blocks are not in the correct order. Keep all the function's code together.` };
+
+                while (stack[stack.length - 1].indent >= line.indent) stack.pop();
+                const parent = stack[stack.length - 1];
+
+                if (node.kind === 'else') {
+                    const sib = parent.children[parent.children.length - 1];
+                    if (!sib || sib.kind !== 'if' || sib.elseNode) {
+                        throw new SimError(`"else:" must line up exactly under its "if" line (same indentation), with only the if's indented code in between.`, i);
+                    }
+                    sib.elseNode = node;
+                } else {
+                    parent.children.push(node);
+                }
+                stack.push(node);
+            }
+            const last = lines[lines.length - 1];
+            if (HEADER_KINDS.includes(parseLine(last.text).kind)) {
+                throw new SimError(`"${last.text}" ends with a colon, so it needs at least one indented line below it.`, lines.length - 1);
+            }
+            return root;
+        }
+
+        // Run the program while the switch follows `schedule` (one value per HOLD seconds).
+        // Records every change in LED state and every time the switch is read.
+        function simulate(root, problem, schedule, invert) {
+            const state = {};
+            for (const ch of Object.keys(problem.channels)) state[ch] = ch === 'rgb' ? '0,0,0' : 0;
+            const defined = new Set(problem.predefined);
+            const funcs = {};
+            const changes = [{ t: 0, s: { ...state } }];
+            const reads = schedule.map(() => []);
+            const notes = new Set();
+            const end = schedule.length * HOLD;
+            let t = 0, steps = 0;
+
+            function advance(dt) {
+                t += dt;
+                if (t >= end || ++steps > MAX_STEPS) throw new SimStop();
+            }
+            function run(nodes, depth, inLoop) {
+                for (const n of nodes) {
+                    advance(TICK);
+                    switch (n.kind) {
+                        case 'def':
+                            funcs[n.name] = n;
+                            if (depth > 0 || inLoop) notes.add('nestedDef');
+                            break;
+                        case 'assign':
+                            defined.add(n.name);
+                            if (inLoop) notes.add('assignInLoop');
+                            break;
+                        case 'set':
+                            if (state[n.channel] !== n.value) {
+                                state[n.channel] = n.value;
+                                changes.push({ t, s: { ...state } });
+                            }
+                            break;
+                        case 'sleep':
+                            advance(n.t);
+                            break;
+                        case 'call':
+                            if (!funcs[n.name]) {
+                                throw new SimError(`${n.name}() is called before Python has run "def ${n.name}():". Python runs from the top down, so a function's def block has to come before any code that calls it (and can't be after while True:, which never ends).`, n.index);
+                            }
+                            if (depth >= MAX_DEPTH) {
+                                throw new SimError(`${n.name}() ends up calling itself over and over. Check the indentation of the "${n.text}" line: it shouldn't be inside the ${n.name}() function.`, n.index);
+                            }
+                            run(funcs[n.name].children, depth + 1, inLoop);
+                            break;
+                        case 'while':
+                            for (;;) { advance(TICK); run(n.children, depth, true); }
+                        case 'if': {
+                            if (!defined.has('switch')) {
+                                throw new SimError(`The switch is read before the line "switch = Pin(14, Pin.IN)" has run. Create the switch before the code that checks it.`, n.index);
+                            }
+                            reads[Math.min(Math.floor(t / HOLD), schedule.length - 1)].push(t);
+                            let v = schedule[Math.min(Math.floor(t / HOLD), schedule.length - 1)];
+                            if (invert) v = 1 - v;
+                            if (v === n.value) run(n.children, depth, inLoop);
+                            else if (n.elseNode) run(n.elseNode.children, depth, inLoop);
+                            break;
+                        }
                     }
                 }
             }
-            
-            // Check ordering constraints (e.g., functions before while) - by text
-            for (const constraint of config.orderConstraints) {
-                const beforeBlock = problem.codeBlocks.find(cb => cb.id === constraint.before);
-                const afterBlock = problem.codeBlocks.find(cb => cb.id === constraint.after);
-                
-                const beforePos = solutionTexts.indexOf(beforeBlock.text);
-                const afterPos = solutionTexts.indexOf(afterBlock.text);
-                
-                if (beforePos === -1 || afterPos === -1) {
-                    continue; // Missing blocks caught elsewhere
-                }
-                if (beforePos > afterPos) {
-                    return { valid: false, message: constraint.message };
-                }
+            try {
+                run(root.children, 0, false);
+                return { finished: true, changes, reads, notes };
+            } catch (e) {
+                if (e instanceof SimStop) return { finished: false, changes, reads, notes };
+                throw e;
             }
-            
-            // Check the main loop structure allows swapped function calls
-            if (config.swappableInLoop) {
-                const whileBlock = problem.codeBlocks.find(cb => cb.id === config.swappableInLoop.whileId);
-                const ifBlock = problem.codeBlocks.find(cb => cb.id === config.swappableInLoop.ifId);
-                const elseBlock = problem.codeBlocks.find(cb => cb.id === config.swappableInLoop.elseId);
-                const callTexts = config.swappableInLoop.callIds.map(id => {
-                    const block = problem.codeBlocks.find(cb => cb.id === id);
-                    return block.text;
-                });
-                
-                const whilePos = solutionTexts.indexOf(whileBlock.text);
-                
-                if (whilePos === -1) {
-                    return { valid: false, message: "Missing 'while True:'" };
-                }
-                
-                // Check if statement comes right after while
-                if (solutionTexts[whilePos + 1] !== ifBlock.text) {
-                    return { valid: false, message: "The if statement should come right after while True:" };
-                }
-                
-                // Check if branch has a valid function call
-                const ifBranchText = solutionTexts[whilePos + 2];
-                if (!callTexts.includes(ifBranchText)) {
-                    return { valid: false, message: "The if branch should contain a function call (led_chase() or show_color())" };
-                }
-                
-                // Check else comes next
-                if (solutionTexts[whilePos + 3] !== elseBlock.text) {
-                    return { valid: false, message: "else: should come after the if branch's function call" };
-                }
-                
-                // Check else branch has a valid function call
-                const elseBranchText = solutionTexts[whilePos + 4];
-                if (!callTexts.includes(elseBranchText)) {
-                    return { valid: false, message: "The else branch should contain a function call (led_chase() or show_color())" };
-                }
-                
-                // Check different functions are called in each branch
-                if (ifBranchText === elseBranchText) {
-                    return { valid: false, message: "Call different functions in the if and else branches" };
-                }
-            }
-            
-            return { valid: true };
         }
 
-        function validateFlexibleIndent(solutionBlocks, problem) {
-            const config = problem.flexibleOrder;
-            
-            // Build a map of text -> expected indent for each position in the solution
-            // Since we already validated order by text, we can match position to expected indent
-            
-            // First, figure out where each group starts in the solution
-            const solutionTexts = solutionBlocks.map(sb => {
-                const block = findBlock(sb.id);
-                return block.text;
-            });
-            
-            // Build position -> expected indent mapping
-            const positionIndents = {};
-            
-            // Process each group to find where it appears
-            for (const group of config.groups) {
-                const groupBlockTexts = group.ids.map(id => {
-                    return problem.codeBlocks.find(cb => cb.id === id).text;
-                });
-                const firstText = groupBlockTexts[0];
-                const startPos = solutionTexts.indexOf(firstText);
-                
-                // Map positions within this group
-                for (let i = 0; i < group.ids.length; i++) {
-                    const expectedIndent = config.expectedIndents[group.ids[i]];
-                    positionIndents[startPos + i] = expectedIndent;
-                }
+        // ---- Turning a recorded timeline into "what you would see" ----
+        const stateKey = s => JSON.stringify(Object.keys(s).sort().map(k => [k, s[k]]));
+        const isOn = v => v === 1 || (typeof v === 'string' && v !== '0,0,0');
+        const durClose = (a, b) => (a === null && b === null) ||
+            (a !== null && b !== null && Math.abs(a - b) <= 0.02 + 0.05 * Math.max(a, b));
+
+        // Raw (state, duration) segments covering the last two loop passes in one switch position
+        function rawWindow(run, seg) {
+            const r = run.reads[seg];
+            if (r.length < 3) return null;
+            const a = r[r.length - 3], b = r[r.length - 1];
+            const ch = run.changes;
+            let i = 0;
+            while (i + 1 < ch.length && ch[i + 1].t <= a) i++;
+            const segs = [];
+            let cur = ch[i].s, ct = a;
+            for (let j = i + 1; j < ch.length && ch[j].t < b; j++) {
+                segs.push({ s: cur, d: ch[j].t - ct });
+                cur = ch[j].s; ct = ch[j].t;
             }
-            
-            // Add the main loop structure positions
-            if (config.swappableInLoop) {
-                const whileBlock = problem.codeBlocks.find(cb => cb.id === config.swappableInLoop.whileId);
-                const whilePos = solutionTexts.indexOf(whileBlock.text);
-                
-                // while, if, call, else, call
-                positionIndents[whilePos] = config.expectedIndents[config.swappableInLoop.whileId];
-                positionIndents[whilePos + 1] = config.expectedIndents[config.swappableInLoop.ifId];
-                positionIndents[whilePos + 2] = 2; // function call indent
-                positionIndents[whilePos + 3] = config.expectedIndents[config.swappableInLoop.elseId];
-                positionIndents[whilePos + 4] = 2; // function call indent
-            }
-            
-            // Now check each position
-            for (let i = 0; i < solutionBlocks.length; i++) {
-                const sb = solutionBlocks[i];
-                const expectedIndent = positionIndents[i];
-                
-                if (expectedIndent !== undefined && sb.indent !== expectedIndent) {
-                    const block = findBlock(sb.id);
-                    const direction = sb.indent < expectedIndent ? "needs more indentation" : "has too much indentation";
-                    return { valid: false, message: `Indentation error: "${block.text}" ${direction}. Code inside functions and if/else blocks must be indented.` };
-                }
-            }
-            
-            return { valid: true };
+            segs.push({ s: cur, d: b - ct });
+            return segs;
         }
+
+        function mergeAdjacent(segs) {
+            const out = [];
+            for (const x of segs) {
+                if (out.length && out[out.length - 1].k === x.k) out[out.length - 1].d += x.d;
+                else out.push({ ...x });
+            }
+            return out;
+        }
+
+        // Cyclic pattern of visible states, with invisible flickers removed
+        function canonical(raw, project) {
+            let segs = mergeAdjacent(raw.map(x => { const s = project(x.s); return { s, k: stateKey(s), d: x.d }; }));
+            const longest = () => { const b = segs.reduce((m, x) => (x.d > m.d ? x : m)); return [{ ...b, d: null }]; };
+            const total = segs.reduce((sum, x) => sum + x.d, 0);
+            if (total < VISIBLE) return longest();
+            const visible = segs.filter(x => x.d >= VISIBLE);
+            if (!visible.length) return longest();
+            segs = mergeAdjacent(visible);
+            if (segs.length > 1 && segs[0].k === segs[segs.length - 1].k) segs[0].d += segs.pop().d;
+            if (segs.length === 1) return [{ ...segs[0], d: null }];
+            const n = segs.length;
+            for (let p = 1; p < n; p++) {
+                if (n % p) continue;
+                let ok = true;
+                for (let i = p; i < n && ok; i++) ok = segs[i].k === segs[i - p].k && durClose(segs[i].d, segs[i - p].d);
+                if (ok) return segs.slice(0, p);
+            }
+            return segs;
+        }
+
+        function cyclicMatch(A, B, allowReverse, checkDurations = true) {
+            if (A.length !== B.length) return false;
+            const n = A.length;
+            const candidates = allowReverse ? [B, [...B].reverse()] : [B];
+            for (const C of candidates) {
+                for (let rot = 0; rot < n; rot++) {
+                    let ok = true;
+                    for (let i = 0; i < n && ok; i++) {
+                        const c = C[(i + rot) % n];
+                        ok = A[i].k === c.k && (!checkDurations || durClose(A[i].d, c.d));
+                    }
+                    if (ok) return true;
+                }
+            }
+            return false;
+        }
+
+        // Compare student vs reference for one switch position.
+        // Outputs the reference never changes in this position (e.g. the RGB LED left
+        // showing its last color during the chase) are compared only as on/off.
+        function compareSegment(problem, refRaw, stuRaw) {
+            const refPlain = canonical(refRaw, s => s);
+            const varying = Object.keys(problem.channels).filter(ch =>
+                new Set(refPlain.map(x => x.s[ch])).size > 1);
+            const project = s => {
+                const p = {};
+                for (const ch of Object.keys(s)) p[ch] = varying.includes(ch) ? s[ch] : (isOn(s[ch]) ? 1 : 0);
+                return p;
+            };
+            const ref = canonical(refRaw, project);
+            const stu = canonical(stuRaw, project);
+            return { ok: cyclicMatch(ref, stu, !!problem.acceptReversed), ref, stu, varying };
+        }
+
+        function joinLabels(labels) {
+            if (labels.length === 1) return labels[0];
+            return labels.slice(0, -1).join(', ') + ' and ' + labels[labels.length - 1];
+        }
+
+        function describeMismatch(problem, v, cmp) {
+            const { ref, stu, varying } = cmp;
+            const where = `With the switch reading ${v}`;
+            const lit = seq => new Set(seq.flatMap(x => Object.keys(x.s).filter(ch => isOn(x.s[ch]))));
+            const refLit = lit(ref), stuLit = lit(stu);
+            const label = ch => problem.channels[ch];
+            const shouldLight = [...refLit].filter(ch => !stuLit.has(ch));
+            const shouldNot = [...stuLit].filter(ch => !refLit.has(ch));
+            const hasSleep = problem.codeBlocks.some(b => b.text.startsWith('sleep('));
+
+            if (shouldLight.length) {
+                const one = shouldLight.length === 1;
+                return `${where}, ${joinLabels(shouldLight.map(label))} should light up, but in your code ${one ? 'it never stays' : 'they never stay'} on long enough to see. Check which lines turn ${one ? 'it' : 'them'} on and off${hasSleep ? ', and where the sleep() calls are' : ''}.`;
+            }
+            if (shouldNot.length) {
+                const one = shouldNot.length === 1;
+                return `${where}, ${joinLabels(shouldNot.map(label))} should be off, but your code leaves ${one ? 'it' : 'them'} on. Check where the line that turns ${one ? 'it' : 'them'} off is.`;
+            }
+            if (varying.includes('rgb')) {
+                const colors = seq => new Set(seq.map(x => x.s.rgb).filter(isOn));
+                const rc = colors(ref), sc = colors(stu);
+                if ([...rc].some(c => !sc.has(c))) {
+                    return `${where}, the RGB LED should switch between ${rc.size} colors, but in your code it doesn't show each color long enough to see. Each color_set() needs a sleep() after it.`;
+                }
+            }
+            if (ref.length > 1 && stu.length === 1) {
+                return `${where}, the lights should change over time, but in your code they never visibly change. Make sure each sleep() pauses between two changes.`;
+            }
+            if (ref.length === 1 && stu.length > 1) {
+                return `${where}, the lights should hold steady, but in your code they change over time. Check where your sleep() and value() lines are.`;
+            }
+            if (cyclicMatch(ref, stu, !!problem.acceptReversed, false)) {
+                return `${where}, the lights follow the right pattern but the timing is off. Check that each sleep() is inside the right function.`;
+            }
+            return `${where}, the right lights turn on, but not in the right pattern. Check the order of the lines inside your functions: each light should be on during a sleep(), then turned off.`;
+        }
+
+        // Main entry point. Returns { valid, message, index (block to highlight), notes }
+        function validateByBehavior(problem, solution) {
+            const lines = solution.map((sb, index) => ({ text: findBlock(sb.id).text, indent: sb.indent, index }));
+            const refLines = problem.codeBlocks.map((b, index) => ({ text: b.text, indent: b.correctIndent, index }));
+
+            let tree;
+            try { tree = buildTree(lines); }
+            catch (e) { if (e instanceof SimError) return { valid: false, message: e.message, index: e.index }; throw e; }
+            const refTree = buildTree(refLines);
+
+            const mappings = problem.flexibleSwitch ? [false, true] : [false];
+            const results = mappings.map(() => ({ matched: 0, firstMiss: null }));
+            const notes = new Set();
+
+            for (const schedule of SCHEDULES) {
+                let run;
+                try { run = simulate(tree, problem, schedule, false); }
+                catch (e) { if (e instanceof SimError) return { valid: false, message: e.message, index: e.index }; throw e; }
+                run.notes.forEach(n => notes.add(n));
+
+                if (run.finished) {
+                    return { valid: false, message: "Your program runs once and then stops. Everything that should repeat (checking the switch and calling the code that lights the LEDs) must be indented inside while True:." };
+                }
+
+                for (let m = 0; m < mappings.length; m++) {
+                    const refRun = simulate(refTree, problem, schedule, mappings[m]);
+                    for (let seg = 0; seg < schedule.length; seg++) {
+                        const stuRaw = rawWindow(run, seg);
+                        if (!stuRaw) {
+                            return { valid: false, message: "Your program never gets to the line that checks the switch (if switch.value() == 1:), so the switch can't control anything. That if line belongs directly inside while True:." };
+                        }
+                        const cmp = compareSegment(problem, rawWindow(refRun, seg), stuRaw);
+                        if (cmp.ok) results[m].matched++;
+                        else if (!results[m].firstMiss) results[m].firstMiss = { v: schedule[seg], cmp };
+                    }
+                }
+            }
+
+            if (results.some(r => !r.firstMiss)) {
+                return { valid: true, notes: [...notes] };
+            }
+            const best = results.reduce((a, b) => (b.matched > a.matched ? b : a));
+            return { valid: false, message: describeMismatch(problem, best.firstMiss.v, best.firstMiss.cmp) };
+        }
+
+        const NOTE_TEXT = {
+            nestedDef: "Tip: your code works, but def blocks normally go at the left edge (no indentation), above while True:, so each function is defined once.",
+            assignInLoop: "Tip: your code works, but switch = Pin(14, Pin.IN) only needs to run once, so it normally goes above while True: instead of inside it."
+        };
 
         // Actions
         function checkSolution() {
             attempts++;
             const problem = problems[currentProblem];
-            
+
             if (attempts >= 2) {
                 document.getElementById('hintBtn').classList.remove('hidden');
             }
 
-            // Check for distractors
+            if (solutionBlocks.length === 0) {
+                showFeedback(false, "Drag code blocks into Your Solution to build your program.");
+                return;
+            }
+
+            // Distractors in the solution
             const distractorIds = problem.distractors.map(d => d.id);
-            const distractorsInSolution = solutionBlocks.filter(sb => distractorIds.includes(sb.id));
-            
-            if (distractorsInSolution.length > 0) {
-                const distractor = problem.distractors.find(d => d.id === distractorsInSolution[0].id);
-                showFeedback(false, `This line doesn't belong: "${distractor.text}" — ${distractor.reason}`);
+            const distractorIndex = solutionBlocks.findIndex(sb => distractorIds.includes(sb.id));
+            if (distractorIndex !== -1) {
+                const distractor = problem.distractors.find(d => d.id === solutionBlocks[distractorIndex].id);
+                showFeedback(false, `This line doesn't belong: "${distractor.text}". ${distractor.reason}`, distractorIndex);
                 return;
             }
 
-            // Check block count
-            if (solutionBlocks.length !== problem.codeBlocks.length) {
-                showFeedback(false, `Your solution has ${solutionBlocks.length} lines, but the correct solution needs ${problem.codeBlocks.length} lines.`);
+            // Real blocks that were thrown away or not used yet
+            const realIds = problem.codeBlocks.map(b => b.id);
+            const trashedReal = discardedBlocks.filter(b => realIds.includes(b.id));
+            if (trashedReal.length > 0) {
+                showFeedback(false, `"${trashedReal[0].text}" is not a distractor. It belongs in your solution, so drag it back out of the discarded pile.`);
+                return;
+            }
+            const unusedReal = availableBlocks.filter(b => realIds.includes(b.id));
+            if (unusedReal.length > 0) {
+                const n = unusedReal.length;
+                showFeedback(false, `There ${n === 1 ? 'is still 1 block' : `are still ${n} blocks`} in the Code Blocks area that ${n === 1 ? 'belongs' : 'belong'} in your solution. Every block except the distractors gets used.`);
                 return;
             }
 
-            // Check order - use flexible validation if configured
-            if (problem.flexibleOrder) {
-                const orderResult = validateFlexibleOrder(solutionBlocks, problem);
-                if (!orderResult.valid) {
-                    showFeedback(false, orderResult.message);
-                    return;
-                }
-                
-                // Check indentation using flexible rules
-                const indentResult = validateFlexibleIndent(solutionBlocks, problem);
-                if (!indentResult.valid) {
-                    showFeedback(false, indentResult.message);
-                    return;
-                }
-            } else {
-                // Compare by TEXT, not IDs (handles identical-text blocks like multiple sleep() calls)
-                const expectedTexts = problem.codeBlocks.map(cb => cb.text);
-                const solutionTexts = solutionBlocks.map(sb => {
-                    const block = findBlock(sb.id);
-                    return block.text;
-                });
-                
-                let orderCorrect = true;
-                for (let i = 0; i < expectedTexts.length; i++) {
-                    if (solutionTexts[i] !== expectedTexts[i]) {
-                        orderCorrect = false;
-                        break;
-                    }
-                }
-
-                if (!orderCorrect) {
-                    showFeedback(false, "The blocks are in the wrong order. Think about what needs to be defined before it can be used.");
-                    return;
-                }
-
-                // Check indentation by position (since text matches, position determines expected indent)
-                const indentErrors = [];
-                solutionBlocks.forEach((sb, index) => {
-                    const expectedBlock = problem.codeBlocks[index];
-                    if (sb.indent !== expectedBlock.correctIndent) {
-                        const block = findBlock(sb.id);
-                        indentErrors.push({
-                            text: block.text,
-                            got: sb.indent,
-                            expected: expectedBlock.correctIndent
-                        });
-                    }
-                });
-
-                if (indentErrors.length > 0) {
-                    const err = indentErrors[0];
-                    const direction = err.got < err.expected ? "needs more indentation" : "has too much indentation";
-                    showFeedback(false, `Indentation error: "${err.text}" ${direction}. Code inside functions and if/else blocks must be indented.`);
-                    return;
-                }
+            const result = validateByBehavior(problem, solutionBlocks);
+            if (!result.valid) {
+                showFeedback(false, result.message, result.index);
+                return;
             }
 
-            showFeedback(true, "Excellent! Your code is correct — including the indentation!");
+            const tips = (result.notes || []).map(n => NOTE_TEXT[n]).filter(Boolean);
+            showFeedback(true, "Excellent! Your code is correct, including the indentation." + (tips.length ? '<br><br>' + tips.join('<br>') : ''));
         }
 
         function resetProblem() {
